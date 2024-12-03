@@ -5,6 +5,7 @@
 #include <vector>
 #include <string>
 #include <cstring>
+#include <algorithm>
 
 #include <log.h>
 
@@ -29,6 +30,18 @@ listdir(const char *path, const char *filter)
 	return fv;
 }
 
+bool
+compare_by_ts(string a, string b) {
+	size_t a_start_key_start = a.find("-") + 1;
+	size_t a_start_key_end   = a.find("~");
+	string a_start_key = a.substr(a_start_key_start, a_start_key_end - a_start_key_start);
+	size_t b_start_key_start = b.find("-") + 1;
+	size_t b_start_key_end   = b.find("~");
+	string b_start_key = b.substr(b_start_key_start, b_start_key_end - b_start_key_start);
+
+	return stoll(a_start_key) <= stoll(b_start_key);
+}
+
 static void
 sortby(vector<string> fv, char *key)
 {
@@ -39,21 +52,29 @@ sortby(vector<string> fv, char *key)
 		if (0 != strncmp(prefix, fname.c_str(), strlen(prefix))) {
 			continue;
 		}
-		if (0 == strcmp(key, "ts")) {
-		}
-		else if (0 == strcmp(key, "signal")) {
-			size_t signal_start = strlen(prefix);
-			size_t signal_end   = fname.find("_", strlen(prefix));
-			string signal = fname.substr(signal_start, signal_end - signal_start);
-			if (fm.find(signal) == fm.end()) {
-				vector<string> v;
-				v.push_back(fname);
-				fm[signal] = v;
-			} else {
-				fm[signal].push_back(fname);
-			}
+		size_t signal_start = strlen(prefix);
+		size_t signal_end   = fname.find("_", strlen(prefix));
+		string signal = fname.substr(signal_start, signal_end - signal_start);
+
+		if (fm.find(signal) == fm.end()) {
+			vector<string> v;
+			v.push_back(fname);
+			fm[signal] = v;
+		} else {
+			fm[signal].push_back(fname);
 		}
 	}
+
+	if (0 == strcmp(key, "ts")) {
+		for (auto const& x : fm) {
+			vector<string> v = x.second;
+			sort(v.begin(), v.end(), compare_by_ts);
+		}
+	}
+	else if (0 == strcmp(key, "signal")) {
+		// nothing to do
+	}
+
 	for (auto const& x : fm) {
 		ptlog("signal: %s", x.first.c_str());
 		for (string s: x.second) {
