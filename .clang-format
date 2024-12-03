@@ -1,0 +1,13 @@
+BasedOnStyle: WebKit
+UseTab: ForIndentation
+IndentWidth: 8
+ColumnLimit: 79
+AlignConsecutiveAssignments: true
+AlignConsecutiveDeclarations: true
+AlignTrailingComments: true
+AlignEscapedNewlinesLeft: true
+PointerAlignment: Right
+AlwaysBreakAfterReturnType: TopLevelDefinitions
+SpaceAfterCStyleCast: true
+AllowShortFunctionsOnASingleLine: Inline
+BreakBeforeBinaryOperators: None
