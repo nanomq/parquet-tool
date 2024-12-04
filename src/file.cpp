@@ -52,6 +52,19 @@ compare_by_ts(string a, string b) {
 }
 
 static void
+show_signalmap(const map<string, vector<string>>& fm)
+{
+	for (const auto& x : fm) {
+		const vector<string>& v = x.second;
+		ptlog("signal: %s", x.first.c_str());
+		for (string s: v) {
+			ptlog("\t%s", s.c_str());
+		}
+		ptlog("--------------------------------------------------");
+	}
+}
+
+static map<string, vector<string>>
 sortby(vector<string> fv, char *key)
 {
 	map<string, vector<string>> fm;
@@ -74,16 +87,12 @@ sortby(vector<string> fv, char *key)
 		}
 	}
 
-	for (auto const& x : fm) {
-		ptlog("signal: %s", x.first.c_str());
-		vector<string> v = x.second;
+	for (auto& x : fm) {
+		vector<string>& v = x.second;
 		if (0 == strcmp(key, "ts")) {
 			sort(v.begin(), v.end(), compare_by_ts);
 		} else if (0 == strcmp(key, "signal")) {
 			// nothing to do
-		}
-		for (string s: v) {
-			ptlog("\t%s", s.c_str());
 		}
 	}
 }
@@ -91,14 +100,21 @@ sortby(vector<string> fv, char *key)
 void
 pt_sort(char *key, char *dir)
 {
-	if (key == NULL)
+	if (key == NULL) {
 		ptlog("null argument key");
-	if (0 != strcmp(key, "ts") && 0 != strcmp(key, "signal"))
+		return;
+	}
+	if (0 != strcmp(key, "ts") && 0 != strcmp(key, "signal")) {
 		ptlog("invalid argument key.");
-	if (dir == NULL)
+		return;
+	}
+	if (dir == NULL) {
 		ptlog("null argument dir");
+		return;
+	}
 
 	vector<string> fv = listdir((const char *)dir, "parquet");
-	sortby(fv, key);
+	map<string, vector<string>> sigmap = sortby(fv, key);
+	show_signalmap(sigmap);
 }
 
