@@ -3,6 +3,7 @@
 #include <cstdlib>
 
 #include <file.h>
+#include <parquet.h>
 
 #define PARQUET_TOOL_VERSION "0.0.1"
 
@@ -52,7 +53,8 @@ main(int argc, char** argv)
 		pt_sort(argv[2], argv[3]);
 	} else if (0 == strcmp(opt, "search") && argc == 5) {
 		pt_search(argv[2], argv[3], argv[4]);
-	} else if (0 == strcmp(opt, "binary")) {
+	} else if (0 == strcmp(opt, "binary") && argc > 3) {
+		pt_binary(argv[2], argc-3, argv + 3);
 	} else if (0 == strcmp(opt, "decrypt")) {
 	} else if (0 == strcmp(opt, "replay")) {
 	} else if (0 == strcmp(opt, "version")) {
