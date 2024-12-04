@@ -50,7 +50,8 @@ main(int argc, char** argv)
 	opt = argv[1];
 	if (0 == strcmp(opt, "sort") && argc == 4) {
 		pt_sort(argv[2], argv[3]);
-	} else if (0 == strcmp(opt, "search")) {
+	} else if (0 == strcmp(opt, "search") && argc == 5) {
+		pt_search(argv[2], argv[3], argv[4]);
 	} else if (0 == strcmp(opt, "binary")) {
 	} else if (0 == strcmp(opt, "decrypt")) {
 	} else if (0 == strcmp(opt, "replay")) {
