@@ -30,16 +30,25 @@ listdir(const char *path, const char *filter)
 	return fv;
 }
 
-bool
-compare_by_ts(string a, string b) {
-	size_t a_start_key_start = a.find("-") + 1;
-	size_t a_start_key_end   = a.find("~");
-	string a_start_key = a.substr(a_start_key_start, a_start_key_end - a_start_key_start);
-	size_t b_start_key_start = b.find("-") + 1;
-	size_t b_start_key_end   = b.find("~");
-	string b_start_key = b.substr(b_start_key_start, b_start_key_end - b_start_key_start);
+static string
+fname_start_key(string fname)
+{
+	size_t start_key_start = fname.find("-") + 1;
+	size_t start_key_end   = fname.find("~");
+	return fname.substr(start_key_start, start_key_end - start_key_start);
+}
 
-	return (stoll(a_start_key) < stoll(b_start_key));
+static string
+fname_end_key(string fname)
+{
+	size_t end_key_start = fname.find("~") + 1;
+	size_t end_key_end   = fname.find(".", end_key_start);
+	return fname.substr(end_key_start, end_key_end - end_key_start);
+}
+
+static bool
+compare_by_ts(string a, string b) {
+	return (stoll(fname_start_key(a)) < stoll(fname_start_key(b)));
 }
 
 static void
