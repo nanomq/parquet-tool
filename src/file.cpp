@@ -39,7 +39,7 @@ compare_by_ts(string a, string b) {
 	size_t b_start_key_end   = b.find("~");
 	string b_start_key = b.substr(b_start_key_start, b_start_key_end - b_start_key_start);
 
-	return stoll(a_start_key) <= stoll(b_start_key);
+	return (stoll(a_start_key) < stoll(b_start_key));
 }
 
 static void
@@ -65,19 +65,15 @@ sortby(vector<string> fv, char *key)
 		}
 	}
 
-	if (0 == strcmp(key, "ts")) {
-		for (auto const& x : fm) {
-			vector<string> v = x.second;
-			sort(v.begin(), v.end(), compare_by_ts);
-		}
-	}
-	else if (0 == strcmp(key, "signal")) {
-		// nothing to do
-	}
-
 	for (auto const& x : fm) {
 		ptlog("signal: %s", x.first.c_str());
-		for (string s: x.second) {
+		vector<string> v = x.second;
+		if (0 == strcmp(key, "ts")) {
+			sort(v.begin(), v.end(), compare_by_ts);
+		} else if (0 == strcmp(key, "signal")) {
+			// nothing to do
+		}
+		for (string s: v) {
 			ptlog("\t%s", s.c_str());
 		}
 	}
