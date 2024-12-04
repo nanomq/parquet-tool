@@ -95,6 +95,30 @@ sortby(vector<string> fv, char *key)
 			// nothing to do
 		}
 	}
+	return fm;
+}
+
+static map<string, vector<string>>
+search_range(map<string, vector<string>> fm, char *start_key, char *end_key)
+{
+	string sk = string(start_key);
+	string ek = string(end_key);
+
+	for (auto& x: fm) {
+		vector<string>& v = x.second;
+		auto it = std::remove_if(v.begin(), v.end(),
+			[&](const string& s) {
+				string fsk = fname_start_key(s);
+				string fek = fname_end_key(s);
+			    if (stoll(fek) < stoll(sk) || stoll(fsk) > stoll(ek)) {
+				    return true;
+			    }
+			    return false;
+		    });
+
+		v.erase(it, v.end());
+	}
+	return fm;
 }
 
 void
@@ -118,3 +142,29 @@ pt_sort(char *key, char *dir)
 	show_signalmap(sigmap);
 }
 
+void
+pt_search(char *start_key, char *end_key, char *dir)
+{
+	if (start_key == NULL) {
+		ptlog("null argument start_key");
+		return;
+	}
+	if (end_key == NULL) {
+		ptlog("null argument end_key");
+		return;
+	}
+	if (dir == NULL) {
+		ptlog("null argument dir");
+		return;
+	}
+	if (stoll(start_key) > stoll(end_key)) {
+		ptlog("Invalid start_key or end_key, start_key should LessEqual than end_key");
+		return;
+	}
+
+	char *key = (char *)"ts";
+	vector<string> fv = listdir((const char *)dir, "parquet");
+	map<string, vector<string>> sigmap = sortby(fv, key);
+	map<string, vector<string>> sigrangemap = search_range(sigmap, start_key, end_key);
+	show_signalmap(sigrangemap);
+}
