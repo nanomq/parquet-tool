@@ -4,6 +4,7 @@
 #include <memory>
 #include <string>
 #include <map>
+#include <vector>
 #include <list>
 #include <iostream>
 
@@ -110,11 +111,9 @@ parquet2bin(char* fname)
                     // printf("%lld %s\n", *iter1, iter2->c_str());
                     // printf("%lld:     ", *iter1);
                     for (int i = 0; i < iter2->length(); i++) {
-
                         unsigned char c = iter2->c_str()[i];
                         //printf("0x%x ", c);
                         printf("%c", c);
-
                     }
 
                     //std::cout <<  std::endl;
@@ -130,3 +129,28 @@ parquet2bin(char* fname)
             printf("exception_msg=[%s]\n", exception_msg.c_str());
     }
 }
+
+static map<string, list<string>>
+read_parquet(char *fname)
+{
+}
+
+void
+pt_binary(char *col, int argc, char **argv)
+{
+	if (col == NULL) {
+		ptlog("null argument col");
+		return;
+	}
+	for (int i=0; i<argc; ++i) {
+		if (argv[i] == NULL) {
+			ptlog("null argument No.%d filename", i);
+			return;
+		}
+	}
+
+	string colkey = string(col);
+	for (int i=0; i<argc; ++i) {
+	}
+}
+
