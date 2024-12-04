@@ -23,8 +23,8 @@ help(char *cmd, const char *ver)
 	printf(":parquet-tool sort ts|signal <DIR>\n");
 	printf(":sort parquet files in <DIR> with ts or signal\n");
 	printf(":--------------------------------------------------\n");
-	printf(":parquet-tool search <START-TIME> <END-TIME> <DIR>\n");
-	printf(":search parquet files in <DIR> in range of <START-TIME> to <END-TIME>\n");
+	printf(":parquet-tool search <START-KEY> <END-KEY> <DIR>\n");
+	printf(":search parquet files in <DIR> in range of <START-KEY> to <END-KEY>\n");
 	printf(":--------------------------------------------------\n");
 	printf(":parquet-tool binary key|data|both <FILE...>\n");
 	printf(":print keys or data or both of them in <FILE...> in binary\n");
