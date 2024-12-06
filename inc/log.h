@@ -1,6 +1,8 @@
 #ifndef PARQUET_TOOL_LOG_H
 #define PARQUET_TOOL_LOG_H
 
+#include <cstdio>
+
 #if 0
 
 #define ptlog(format, ...) \

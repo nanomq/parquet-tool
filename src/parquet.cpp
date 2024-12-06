@@ -1,4 +1,5 @@
 #include <any>
+#include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <cassert>
@@ -19,6 +20,9 @@
 #include <parquet/arrow/reader.h>
 #include <parquet/file_reader.h>
 #include <parquet/exception.h>
+
+#include <mqtt.h>
+#include <nng/nng.h>
 
 using namespace std;
 
@@ -272,7 +276,6 @@ pt_binary(char *col, int argc, char **argv)
 		}
 	}
 
-	string colkey = string(col);
 	for (int i=0; i<argc; ++i) {
 		map<string, any> lm = read_parquet(argv[i], NULL, NULL, NULL);
 		showparquet(lm, col);
@@ -293,9 +296,34 @@ pt_decrypt(char *col, char *footkey, char *col1key, char *col2key, int argc, cha
 		}
 	}
 
-	string colkey = string(col);
 	for (int i=0; i<argc; ++i) {
 		map<string, any> lm = read_parquet(argv[i], footkey, col1key, col2key);
 		showparquet(lm, col);
+	}
+}
+
+void
+pt_replay(char *interval, char *url, char *topic, int argc, char **argv)
+{
+	nng_socket sock;
+	mqtt_connect(&sock, url);
+	int timepast = 0; // ms
+
+	for (int i=0; i<argc; ++i) {
+		map<string, any> lm = read_parquet(argv[i], NULL, NULL, NULL);
+		if (lm.end() == lm.find(path_str)) {
+			ptlog("No data found");
+			continue;
+		}
+		int cnt = 0;
+		list<string> col2 = any_cast<list<string>>(lm[path_str]);
+		list<string>::iterator it2 = col2.begin();
+		while (col2.end() != it2) {
+			mqtt_publish(sock, topic, it2->c_str(), it2->length());
+			it2++; cnt++;
+			usleep(stoi(interval) * 1000);
+			if ((timepast += stoi(interval)) % 5000 == 0)
+				ptlog("sent %d msgs in %s", cnt, argv[i]);
+		}
 	}
 }

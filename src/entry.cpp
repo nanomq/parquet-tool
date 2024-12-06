@@ -2,6 +2,7 @@
 #include <cstring>
 #include <cstdlib>
 
+#include <log.h>
 #include <file.h>
 #include <parquet.h>
 
@@ -18,7 +19,7 @@ help(char *cmd, const char *ver)
 	printf("%s search 0 1000 /tmp\n", cmd);
 	printf("%s binary data /tmp/foo.parquet /tmp/bar.parquet\n", cmd);
 	printf("%s decrypt /tmp/foo.parquet\n", cmd);
-	printf("%s replay 10 mqtt-tcp://127.0.0.1:1883 /tmp/foo.parquet\n", cmd);
+	printf("%s replay 10 mqtt-tcp://127.0.0.1:1883 topic /tmp/foo.parquet\n", cmd);
 	printf("\n");
 
 	printf(":parquet-tool sort ts|signal <DIR>\n");
@@ -33,7 +34,7 @@ help(char *cmd, const char *ver)
 	printf(":parquet-tool decrypt key|data|both <FOOT-KEY> <COL1-KEY> <COL2-KEY> <FILE...>\n");
 	printf(":decrypt key or data or both in<FILE...> with <FOOT-KEY> <COL1-KEY> <COL2-KEY>\n");
 	printf(":--------------------------------------------------\n");
-	printf(":parquet-tool replay <INTERVAL> <MQTT-URL> <TOP> <FILE...>\n");
+	printf(":parquet-tool replay <INTERVAL> <MQTT-URL> <TOPIC> <FILE...>\n");
 	printf(":replay datas in <FILE...> to <MQTT-URL> mqtt broker in <INTERVAL>ms\n");
 	printf("\n");
 	exit(0);
@@ -56,11 +57,13 @@ main(int argc, char** argv)
 		pt_binary(argv[2], argc-3, argv + 3);
 	} else if (0 == strcmp(opt, "decrypt") && argc > 6) {
 		pt_decrypt(argv[2], argv[3], argv[4], argv[5], argc-6, argv + 6);
-	} else if (0 == strcmp(opt, "replay")) {
+	} else if (0 == strcmp(opt, "replay") && argc > 5) {
+		pt_replay(argv[2], argv[3], argv[4], argc-5, argv + 5);
 	} else if (0 == strcmp(opt, "version")) {
 		printf("%s", PARQUET_TOOL_VERSION);
 	} else {
-		printf("number of args wrong\n");
+		ptlog("number of args wrong\n");
+		help(cmd, PARQUET_TOOL_VERSION);
 	}
 	return 0;
 }
