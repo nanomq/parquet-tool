@@ -247,7 +247,8 @@ showparquet(map<string, any>& lm, char *col)
 		while (col2.end() != it2) {
 			for (int i = 0; i < it2->length(); i++)
 				printf("%c", it2->c_str()[i]);
-			printf("\n");
+			if (!is_quiet_mode())
+				printf("\n");
 			it2++;
 		}
 	} else if (0 == strcmp("both", col)) {

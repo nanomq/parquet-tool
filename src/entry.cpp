@@ -51,6 +51,7 @@ main(int argc, char** argv)
 	if (argc < 2) {
 		help(cmd, PARQUET_TOOL_VERSION);
 	}
+	ptlog_init();
 	opt = argv[1];
 	if (0 == strcmp(opt, "sort") && argc == 4) {
 		pt_sort(argv[2], argv[3]);
