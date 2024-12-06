@@ -22,6 +22,9 @@
 
 using namespace std;
 
+static string path_int64 = "key";
+static string path_str   = "data";
+
 const char* kFooterEncryptionKey = "0123456789012345";  // 128bit/16
 const char* kColumnEncryptionKey1 = "0123456789012345";
 const char* kColumnEncryptionKey2 = "0123456789012345";
@@ -32,8 +35,6 @@ parquet2bin(char* fname)
     std::vector<std::shared_ptr<parquet::FileDecryptionProperties> > vector_of_decryption_configurations;
 
     // Decryption configuration 3: Decrypt using explicit column and footer keys.
-    std::string path_int64 = "key";
-    std::string path_str = "data";
     std::map<std::string, std::shared_ptr<parquet::ColumnDecryptionProperties> >   decryption_cols;
     parquet::ColumnDecryptionProperties::Builder decryption_col_builder31(path_int64);
     parquet::ColumnDecryptionProperties::Builder decryption_col_builder32(path_str);
@@ -140,8 +141,6 @@ read_parquet(char *fname, const char *footkey, const char *col1key, const char *
 	std::unique_ptr<parquet::ParquetFileReader> parquet_reader;
 	parquet::ReaderProperties reader_properties = parquet::default_reader_properties();
 
-	std::string path_int64 = "key";
-	std::string path_str   = "data";
 	std::map<std::string, std::shared_ptr<parquet::ColumnDecryptionProperties>> decryption_cols;
 
     parquet::ColumnDecryptionProperties::Builder decryption_col_builder31(path_int64);
@@ -161,9 +160,9 @@ read_parquet(char *fname, const char *footkey, const char *col1key, const char *
 		// Add the current decryption configuration to ReaderProperties.
 		reader_properties.file_decryption_properties(vector_of_decryption_configurations[0]->DeepClone());
 	}
-	parquet_reader = parquet::ParquetFileReader::OpenFile(fname, false, reader_properties);
 
 	try {
+		parquet_reader = parquet::ParquetFileReader::OpenFile(fname, false, reader_properties);
 		// Get the File MetaData
 		std::shared_ptr<parquet::FileMetaData> file_metadata = parquet_reader->metadata();
         int num_row_groups = file_metadata->num_row_groups();  //Get the number of RowGroups
@@ -225,9 +224,10 @@ read_parquet(char *fname, const char *footkey, const char *col1key, const char *
 static void
 showparquet(map<string, any>& lm, char *col)
 {
-	string path_int64 = "key";
-	string path_str   = "data";
-
+	if (lm.end() == lm.find(path_int64) || lm.end() == lm.find(path_str)) {
+		ptlog("No key or data found");
+		return;
+	}
 	list<int64_t> col1 = any_cast<list<int64_t>>(lm[path_int64]);
 	list<string>  col2 = any_cast<list<string>>(lm[path_str]);
 
@@ -275,6 +275,27 @@ pt_binary(char *col, int argc, char **argv)
 	string colkey = string(col);
 	for (int i=0; i<argc; ++i) {
 		map<string, any> lm = read_parquet(argv[i], NULL, NULL, NULL);
+		showparquet(lm, col);
+	}
+}
+
+void
+pt_decrypt(char *col, char *footkey, char *col1key, char *col2key, int argc, char **argv)
+{
+	if (col == NULL) {
+		ptlog("null argument col");
+		return;
+	}
+	for (int i=0; i<argc; ++i) {
+		if (argv[i] == NULL) {
+			ptlog("null argument No.%d filename", i);
+			return;
+		}
+	}
+
+	string colkey = string(col);
+	for (int i=0; i<argc; ++i) {
+		map<string, any> lm = read_parquet(argv[i], footkey, col1key, col2key);
 		showparquet(lm, col);
 	}
 }

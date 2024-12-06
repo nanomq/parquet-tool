@@ -30,11 +30,10 @@ help(char *cmd, const char *ver)
 	printf(":parquet-tool binary key|data|both <FILE...>\n");
 	printf(":print keys or data or both of them in <FILE...> in binary\n");
 	printf(":--------------------------------------------------\n");
-	printf(":parquet-tool decrypt <FOOT-KEY> <COL1-KEY> <COL2-KEY> <FILE...>\n");
-	printf(":decrypt <FILE...> with <FOOT-KEY> <COL1-KEY> <COL2-KEY>.\n");
-	printf(":filename of decrypted files will be like dec.foo.parquet\n");
+	printf(":parquet-tool decrypt key|data|both <FOOT-KEY> <COL1-KEY> <COL2-KEY> <FILE...>\n");
+	printf(":decrypt key or data or both in<FILE...> with <FOOT-KEY> <COL1-KEY> <COL2-KEY>\n");
 	printf(":--------------------------------------------------\n");
-	printf(":parquet-tool replay <INTERVAL> <MQTT-URL> <FILE...>\n");
+	printf(":parquet-tool replay <INTERVAL> <MQTT-URL> <TOP> <FILE...>\n");
 	printf(":replay datas in <FILE...> to <MQTT-URL> mqtt broker in <INTERVAL>ms\n");
 	printf("\n");
 	exit(0);
@@ -55,7 +54,8 @@ main(int argc, char** argv)
 		pt_search(argv[2], argv[3], argv[4]);
 	} else if (0 == strcmp(opt, "binary") && argc > 3) {
 		pt_binary(argv[2], argc-3, argv + 3);
-	} else if (0 == strcmp(opt, "decrypt")) {
+	} else if (0 == strcmp(opt, "decrypt") && argc > 6) {
+		pt_decrypt(argv[2], argv[3], argv[4], argv[5], argc-6, argv + 6);
 	} else if (0 == strcmp(opt, "replay")) {
 	} else if (0 == strcmp(opt, "version")) {
 		printf("%s", PARQUET_TOOL_VERSION);
