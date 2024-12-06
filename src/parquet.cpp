@@ -303,14 +303,14 @@ pt_decrypt(char *col, char *footkey, char *col1key, char *col2key, int argc, cha
 }
 
 void
-pt_replay(char *interval, char *url, char *topic, int argc, char **argv)
+pt_decreplay(char *footkey, char *col1key, char *col2key, char *interval, char *url, char *topic, int argc, char **argv)
 {
 	nng_socket sock;
 	mqtt_connect(&sock, url);
 	int timepast = 0; // ms
 
 	for (int i=0; i<argc; ++i) {
-		map<string, any> lm = read_parquet(argv[i], NULL, NULL, NULL);
+		map<string, any> lm = read_parquet(argv[i], footkey, col1key, col2key);
 		if (lm.end() == lm.find(path_str)) {
 			ptlog("No data found");
 			continue;
@@ -326,4 +326,9 @@ pt_replay(char *interval, char *url, char *topic, int argc, char **argv)
 				ptlog("sent %d msgs in %s", cnt, argv[i]);
 		}
 	}
+}
+void
+pt_replay(char *interval, char *url, char *topic, int argc, char **argv)
+{
+	pt_decreplay(NULL, NULL, NULL, interval, url, topic, argc, argv);
 }

@@ -36,6 +36,9 @@ help(char *cmd, const char *ver)
 	printf(":--------------------------------------------------\n");
 	printf(":parquet-tool replay <INTERVAL> <MQTT-URL> <TOPIC> <FILE...>\n");
 	printf(":replay datas in <FILE...> to <MQTT-URL> mqtt broker in <INTERVAL>ms\n");
+	printf(":--------------------------------------------------\n");
+	printf(":parquet-tool decreplay <FOOT-KEY> <COL1-KEY> <COL2-KEY> <INTERVAL> <MQTT-URL> <TOPIC> <FILE...>\n");
+	printf(":Combine decrypt and replay\n");
 	printf("\n");
 	exit(0);
 }
@@ -59,10 +62,12 @@ main(int argc, char** argv)
 		pt_decrypt(argv[2], argv[3], argv[4], argv[5], argc-6, argv + 6);
 	} else if (0 == strcmp(opt, "replay") && argc > 5) {
 		pt_replay(argv[2], argv[3], argv[4], argc-5, argv + 5);
+	} else if (0 == strcmp(opt, "decreplay") && argc > 8) {
+		pt_decreplay(argv[2], argv[3], argv[4], argv[5], argv[6], argv[7], argc-8, argv + 8);
 	} else if (0 == strcmp(opt, "version")) {
 		printf("%s", PARQUET_TOOL_VERSION);
 	} else {
-		ptlog("number of args wrong\n");
+		ptlog("number of args wrong or invalid option\n");
 		help(cmd, PARQUET_TOOL_VERSION);
 	}
 	return 0;
