@@ -212,6 +212,7 @@ pt_decreplay(char *footkey, char *col1key, char *col2key, char *interval, char *
 		list<string>::iterator it2 = col2.begin();
 		while (col2.end() != it2) {
 			mqtt_publish(sock, topic, it2->c_str(), it2->length());
+			ptlog("%.*X", it2->length(), it2->c_str());
 			it2++; cnt++;
 			usleep(stoi(interval) * 1000);
 			if ((timepast += stoi(interval)) % 5000 == 0)
