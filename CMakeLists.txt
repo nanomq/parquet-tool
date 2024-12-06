@@ -7,5 +7,5 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/inc)
 file(GLOB APP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
 add_executable(parquet-tool
 	${APP_SOURCES})
-target_link_libraries(parquet-tool boost_filesystem boost_thread boost_system boost_serialization pthread boost_chrono arrow parquet)
+target_link_libraries(parquet-tool boost_filesystem boost_thread boost_system boost_serialization pthread boost_chrono arrow parquet nng)
 
