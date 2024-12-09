@@ -155,6 +155,29 @@ showparquet(map<string, any>& lm, char *col)
 	}
 }
 
+static vector<pair<int64_t, string>>
+rangeof(map<string, any> lm, char *start_key, char *end_key)
+{
+	vector<pair<int64_t, string>> res;
+	list<int64_t> col1 = any_cast<list<int64_t>>(lm[path_int64]);
+	list<string>  col2 = any_cast<list<string>>(lm[path_str]);
+
+	list<int64_t>::iterator it1 = col1.begin();
+	list<string>::iterator  it2 = col2.begin();
+
+	int64_t sk = stoll(start_key);
+	int64_t ek = stoll(end_key);
+
+	while (it1 != col1.end() && it2 != col2.end()) {
+		if (sk <= *it1 && *it1 <= ek) {
+			res.push_back(pair<int64_t, string>(*it1, *it2));
+		}
+		it1 ++;
+		it2 ++;
+	}
+	return res;
+}
+
 void
 pt_binary(char *col, int argc, char **argv)
 {
