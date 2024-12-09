@@ -104,8 +104,10 @@ read_parquet(char *fname, const char *footkey, const char *col1key, const char *
 				}
 				col2n ++;
 			}
-			ptlog("col1n=%d,col2n=%d\n", col1n, col2n);
-			assert(col1n == col2n);
+			if (col1n != col2n) {
+				ptlog("Invaild parquet file %s col1n=%d,col2n=%d\n", fname, col1n, col2n);
+				return lm;
+			}
 
 			lm[path_int64] = col1;
 			lm[path_str]   = col2;

@@ -14,7 +14,6 @@ void
 ptlog_init()
 {
 	char *value = getenv("QUIET");
-	printf("QUIET:[%s]\n", value);
 	if (value && 0 == strcmp(value, "1"))
 		ptlog_quiet = true;
 }
