@@ -64,7 +64,7 @@ read_parquet(char *fname, const char *footkey, const char *col1key, const char *
 		int num_row_groups = file_metadata->num_row_groups();  //Get the number of RowGroups
 		int num_columns = file_metadata->num_columns();   //Get the number of Columns
 		assert(num_columns == 2);
-		ptlog("%s:num_row_groups=[%d],num_columns=[%d]\n", fname, num_row_groups, num_columns);
+		//ptlog("%s:num_row_groups=[%d],num_columns=[%d]", fname, num_row_groups, num_columns);
 
 		for (int r = 0; r < num_row_groups; ++r) {
 			std::shared_ptr<parquet::RowGroupReader> row_group_reader = parquet_reader->RowGroup(r);
@@ -105,7 +105,7 @@ read_parquet(char *fname, const char *footkey, const char *col1key, const char *
 				col2n ++;
 			}
 			if (col1n != col2n) {
-				ptlog("Invaild parquet file %s col1n=%d,col2n=%d\n", fname, col1n, col2n);
+				ptlog("Invaild parquet file %s col1n=%d,col2n=%d", fname, col1n, col2n);
 				return lm;
 			}
 
