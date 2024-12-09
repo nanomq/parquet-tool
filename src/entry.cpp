@@ -55,8 +55,13 @@ main(int argc, char** argv)
 	opt = argv[1];
 	if (0 == strcmp(opt, "sort") && argc == 4) {
 		pt_sort(argv[2], argv[3]);
-	} else if (0 == strcmp(opt, "search") && argc == 5) {
-		pt_search(argv[2], argv[3], argv[4]);
+	} else if (0 == strcmp(opt, "ls") && argc == 5) {
+		pt_ls(argv[2], argv[3], argv[4]);
+	} else if (0 == strcmp(opt, "search") && argc == 7) {
+		pt_search(argv[2], argv[3], argv[4], argv[5], argv[6]);
+	} else if (0 == strcmp(opt, "dersearch") && argc == 10) {
+		pt_decsearch(argv[2], argv[3], argv[4], argv[5],
+			argv[6], argv[7], argv[8], argv[9]);
 	} else if (0 == strcmp(opt, "binary") && argc > 3) {
 		pt_binary(argv[2], argc-3, argv + 3);
 	} else if (0 == strcmp(opt, "decrypt") && argc > 6) {

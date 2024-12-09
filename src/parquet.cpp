@@ -9,7 +9,6 @@
 #include <vector>
 #include <list>
 #include <iostream>
-#include <log.h>
 
 #include <arrow/io/file.h>
 #include <arrow/api.h>
@@ -21,6 +20,8 @@
 #include <parquet/file_reader.h>
 #include <parquet/exception.h>
 
+#include <file.h>
+#include <log.h>
 #include <mqtt.h>
 #include <nng/nng.h>
 

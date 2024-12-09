@@ -11,7 +11,7 @@
 
 using namespace std;
 
-static vector<string>
+vector<string>
 listdir(const char *path, const char *filter)
 {
 	DIR                *d;
@@ -64,7 +64,7 @@ show_signalmap(const map<string, vector<string>>& fm)
 	}
 }
 
-static map<string, vector<string>>
+map<string, vector<string>>
 sortby(vector<string> fv, char *key)
 {
 	map<string, vector<string>> fm;
@@ -143,7 +143,7 @@ pt_sort(char *key, char *dir)
 }
 
 void
-pt_search(char *start_key, char *end_key, char *dir)
+pt_ls(char *start_key, char *end_key, char *dir)
 {
 	if (start_key == NULL) {
 		ptlog("null argument start_key");
