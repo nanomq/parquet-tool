@@ -39,11 +39,11 @@ read_parquet(char *fname, const char *footkey, const char *col1key, const char *
 
 	std::map<std::string, std::shared_ptr<parquet::ColumnDecryptionProperties>> decryption_cols;
 
-    parquet::ColumnDecryptionProperties::Builder decryption_col_builder31(path_int64);
+	parquet::ColumnDecryptionProperties::Builder decryption_col_builder31(path_int64);
 	if (col1key) {
 		decryption_cols[path_int64] = decryption_col_builder31.key(col1key)->build();
 	}
-    parquet::ColumnDecryptionProperties::Builder decryption_col_builder32(path_str);
+	parquet::ColumnDecryptionProperties::Builder decryption_col_builder32(path_str);
 	if (col2key) {
 		decryption_cols[path_str]   = decryption_col_builder32.key(col2key)->build();
 	}
@@ -52,7 +52,7 @@ read_parquet(char *fname, const char *footkey, const char *col1key, const char *
 	if (footkey) {
 		std::vector<std::shared_ptr<parquet::FileDecryptionProperties>> vector_of_decryption_configurations;
 		vector_of_decryption_configurations.push_back(
-			file_decryption_builder_3.footer_key(footkey)->column_keys(decryption_cols)->build());
+		    file_decryption_builder_3.footer_key(footkey)->column_keys(decryption_cols)->build());
 		// Add the current decryption configuration to ReaderProperties.
 		reader_properties.file_decryption_properties(vector_of_decryption_configurations[0]->DeepClone());
 	}
@@ -61,7 +61,7 @@ read_parquet(char *fname, const char *footkey, const char *col1key, const char *
 		parquet_reader = parquet::ParquetFileReader::OpenFile(fname, false, reader_properties);
 		// Get the File MetaData
 		std::shared_ptr<parquet::FileMetaData> file_metadata = parquet_reader->metadata();
-        int num_row_groups = file_metadata->num_row_groups();  //Get the number of RowGroups
+		int num_row_groups = file_metadata->num_row_groups();  //Get the number of RowGroups
 		int num_columns = file_metadata->num_columns();   //Get the number of Columns
 		assert(num_columns == 2);
 		ptlog("%s:num_row_groups=[%d],num_columns=[%d]\n", fname, num_row_groups, num_columns);
