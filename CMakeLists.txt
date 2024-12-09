@@ -3,6 +3,13 @@ project(parquet-tool)
 
 add_definitions(-std=c++17)
 
+if (DEBUG)
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g")
+	if (ASAN)
+		SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address")
+	endif (ASAN)
+endif (DEBUG)
+
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/inc)
 file(GLOB APP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
 add_executable(parquet-tool
