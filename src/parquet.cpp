@@ -118,6 +118,24 @@ read_parquet(char *fname, const char *footkey, const char *col1key, const char *
 }
 
 static void
+showvector(vector<pair<int64_t, string>> res, char *col)
+{
+	for (pair<int64_t, string> e : res) {
+		if (path_str.compare(col) == 0) {
+			for (int i = 0; i < e.second.length(); i++)
+				printf("%c", e.second.c_str()[i]);
+			if (!is_quiet_mode())
+				printf("\n");
+		} else if (strcmp("both", col) == 0) {
+			printf("%lld,", e.first);
+			for (int i = 0; i < e.second.length(); i++)
+				printf("%c", e.second.c_str()[i]);
+			printf("\n");
+		}
+	}
+}
+
+static void
 showparquet(map<string, any>& lm, char *col)
 {
 	if (lm.end() == lm.find(path_int64) || lm.end() == lm.find(path_str)) {
@@ -176,6 +194,11 @@ rangeof(map<string, any> lm, char *start_key, char *end_key)
 		it2 ++;
 	}
 	return res;
+}
+
+static bool
+compare_by_col1(pair<int64_t, string> a, pair<int64_t, string> b) {
+	return a.first < b.first;
 }
 
 void
@@ -244,8 +267,35 @@ pt_decreplay(char *footkey, char *col1key, char *col2key, char *interval, char *
 		}
 	}
 }
+
 void
 pt_replay(char *interval, char *url, char *topic, int argc, char **argv)
 {
 	pt_decreplay(NULL, NULL, NULL, interval, url, topic, argc, argv);
 }
+
+void
+pt_decsearch(char *col, char *signal, char *footkey, char *col1key, char *col2key, char *start_key, char *end_key, char *dir)
+{
+	vector<pair<int64_t, string>> res;
+	vector<string> fv = listdir((const char *)dir, "parquet");
+	map<string, vector<string>> fm = sortby(fv, (char *)"signal");
+	for (auto& x: fm) {
+		if (x.first.compare(signal) != 0)
+			continue;
+		for (string fname: x.second) {
+			map<string, any> lm = read_parquet((char *)fname.c_str(), footkey, col1key, col2key);
+			vector<pair<int64_t, string>> rm = rangeof(lm, start_key, end_key);
+			res.insert(res.end(), rm.begin(), rm.end());
+		}
+	}
+	sort(res.begin(), res.end(), compare_by_col1);
+	showvector(res, col);
+}
+
+void
+pt_search(char *col, char *signal, char *start_key, char *end_key, char *dir)
+{
+	pt_decsearch(col, signal, NULL, NULL, NULL, start_key, end_key, dir);
+}
+
