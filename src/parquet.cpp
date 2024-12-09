@@ -179,6 +179,12 @@ static vector<pair<int64_t, string>>
 rangeof(map<string, any> lm, char *start_key, char *end_key)
 {
 	vector<pair<int64_t, string>> res;
+
+	if (lm.end() == lm.find(path_int64) || lm.end() == lm.find(path_str)) {
+		ptlog("No key or data found");
+		return res;
+	}
+
 	list<int64_t> col1 = any_cast<list<int64_t>>(lm[path_int64]);
 	list<string>  col2 = any_cast<list<string>>(lm[path_str]);
 
@@ -286,7 +292,10 @@ pt_decsearch(char *col, char *signal, char *footkey, char *col1key, char *col2ke
 		if (x.first.compare(signal) != 0)
 			continue;
 		for (string fname: x.second) {
-			map<string, any> lm = read_parquet((char *)fname.c_str(), footkey, col1key, col2key);
+			string p = string(dir);
+			if (p.back() != '/') p.push_back('/');
+			string fullpath = fname.insert(0, p);
+			map<string, any> lm = read_parquet((char *)fullpath.c_str(), footkey, col1key, col2key);
 			vector<pair<int64_t, string>> rm = rangeof(lm, start_key, end_key);
 			res.insert(res.end(), rm.begin(), rm.end());
 		}
