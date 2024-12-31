@@ -19,6 +19,8 @@
 #include <parquet/arrow/reader.h>
 #include <parquet/file_reader.h>
 #include <parquet/exception.h>
+#include <parquet/stream_reader.h>
+#include <parquet/stream_writer.h>
 
 #include <file.h>
 #include <log.h>
@@ -29,6 +31,98 @@ using namespace std;
 
 static string path_int64 = "key";
 static string path_str   = "data";
+
+static int
+write_parquet(char *fname, const char *footkey, const char *col1key, const char *col2key, map<string, any> lm)
+{
+
+using parquet::ConvertedType;
+using parquet::Encoding;
+using parquet::Repetition;
+using parquet::Type;
+using parquet::schema::GroupNode;
+using parquet::schema::PrimitiveNode;
+
+try {
+	const char *schema[2];
+	schema[0] = path_int64.c_str(); schema[1] = path_str.c_str();
+	parquet::schema::NodeVector fields;
+	fields.push_back(
+	    PrimitiveNode::Make(schema[0], parquet::Repetition::REQUIRED,
+	        parquet::Type::INT64, parquet::ConvertedType::UINT_64));
+	fields.push_back(
+	    PrimitiveNode::Make(schema[1], Repetition::OPTIONAL,
+	        Type::BYTE_ARRAY, ConvertedType::NONE));
+	shared_ptr<GroupNode> _schema = static_pointer_cast<GroupNode>(
+		GroupNode::Make("schema", Repetition::REQUIRED, fields));
+
+	parquet::WriterProperties::Builder builder;
+	builder.created_by("NanoMQ-ParquetTool")
+	    ->version(parquet::ParquetVersion::PARQUET_2_6)
+	    ->data_page_version(parquet::ParquetDataPageVersion::V2)
+	    ->encoding(schema[0], Encoding::DELTA_BINARY_PACKED)
+	    ->disable_dictionary(schema[0])
+	    ->compression(static_cast<arrow::Compression::type>(4)); // ZSTD
+
+	// TODO Decrypt
+
+	shared_ptr<parquet::WriterProperties> props = builder.build();
+	using FileClass = arrow::io::FileOutputStream;
+	shared_ptr<FileClass> out_file;
+	PARQUET_ASSIGN_OR_THROW(out_file, FileClass::Open(fname));
+	shared_ptr<parquet::ParquetFileWriter> file_writer =
+	    parquet::ParquetFileWriter::Open(out_file, _schema, props);
+
+	// Append a RowGroup with a specific number of rows.
+	parquet::RowGroupWriter *rg_writer = file_writer->AppendRowGroup();
+
+	// Write the Int64 column
+	printf("start doing int64 write");
+	list<int64_t> col1 = any_cast<list<int64_t>>(lm[path_int64]);
+	list<int64_t>::iterator it1 = col1.begin();
+	parquet::Int64Writer *int64_writer =
+	    static_cast<parquet::Int64Writer *>(rg_writer->NextColumn());
+	for (uint32_t r = 0; r < col1.size(); r++) {
+		int64_t value            = *it1;
+		int16_t definition_level = 1;
+		int64_writer->WriteBatch(1, &definition_level, nullptr, &value);
+		it1++;
+	}
+	printf("end doing int64 write");
+
+	// Write the ByteArray column. Make every alternate values NULL
+	list<string>  col2 = any_cast<list<string>>(lm[path_str]);
+	list<string>::iterator  it2 = col2.begin();
+	parquet::ByteArrayWriter *ba_writer =
+	    static_cast<parquet::ByteArrayWriter *>(rg_writer->NextColumn());
+	for (uint32_t r = 0; r < col2.size(); r++) {
+		if (it2->length() != 0) {
+			int16_t definition_level = 1;
+			parquet::ByteArray value;
+			value.ptr = (const uint8_t *)it2->c_str();
+			value.len = it2->length();
+			ba_writer->WriteBatch(1, &definition_level, nullptr, &value);
+		} else {
+			int16_t definition_level = 0;
+			ba_writer->WriteBatch(1, &definition_level, nullptr, nullptr);
+		}
+		it2 ++;
+	}
+	printf("stop doing ByteArray write");
+
+	// Close the RowGroupWriter
+	rg_writer->Close();
+
+	// Close the ParquetFileWriter
+	file_writer->Close();
+} catch (const exception &e) {
+	string exception_msg = e.what();
+	printf("exception_msg=[%s]", exception_msg.c_str());
+	return -1;
+}
+
+	return 0;
+}
 
 static map<string, any>
 read_parquet(char *fname, const char *footkey, const char *col1key, const char *col2key)
