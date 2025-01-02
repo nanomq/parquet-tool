@@ -285,6 +285,39 @@ showparquet(map<string, any>& lm, char *col)
 }
 
 static vector<pair<int64_t, string>>
+fuzz_ts_rangeof(map<string, any> lm, char *start_key, char *end_key, int64_t& lastts)
+{
+	vector<pair<int64_t, string>> res;
+
+	if (lm.end() == lm.find(path_int64) || lm.end() == lm.find(path_str)) {
+		ptlog("No key or data found");
+		return res;
+	}
+
+	list<int64_t> col1 = any_cast<list<int64_t>>(lm[path_int64]);
+	list<string>  col2 = any_cast<list<string>>(lm[path_str]);
+
+	list<int64_t>::iterator it1 = col1.begin();
+	list<string>::iterator  it2 = col2.begin();
+
+	int64_t sk = stoll(start_key);
+	int64_t ek = stoll(end_key);
+
+	while (it1 != col1.end() && it2 != col2.end()) {
+		if (lastts >= ek) {
+			break;
+		}
+		if (sk <= *it1 && *it1 <= ek && lastts < *it1) {
+			res.push_back(pair<int64_t, string>(*it1, *it2));
+			lastts = *it1;
+		}
+		it1 ++;
+		it2 ++;
+	}
+	return res;
+}
+
+static vector<pair<int64_t, string>>
 rangeof(map<string, any> lm, char *start_key, char *end_key)
 {
 	vector<pair<int64_t, string>> res;
@@ -412,7 +445,7 @@ pt_decsearch(char *signal, char *footkey, char *col1key, char *col2key, char *st
 	sort(res.begin(), res.end(), compare_by_col1);
 	map<string, any> resm = parquet_map(res);
 	char foname[128];
-	sprintf(foname, "%s-%s-%s.parquet", signal, start_key, end_key);
+	sprintf(foname, "search-%s-%s-%s.parquet", signal, start_key, end_key);
 	write_parquet(foname, footkey, col1key, col2key, resm);
 }
 
@@ -422,3 +455,33 @@ pt_search(char *signal, char *start_key, char *end_key, char *dir)
 	pt_decsearch(signal, NULL, NULL, NULL, start_key, end_key, dir);
 }
 
+void
+pt_decfuzz(char *signal, char *footkey, char *col1key, char *col2key, char *start_key, char *end_key, char *dir)
+{
+	int64_t lastts = 0;
+	vector<pair<int64_t, string>> res;
+	vector<string> fv = listdir((const char *)dir, "parquet");
+	map<string, vector<string>> fm = sortby(fv, (char *)"signal");
+	for (auto& x: fm) {
+		if (x.first.compare(signal) != 0)
+			continue;
+		for (string fname: x.second) {
+			string p = string(dir);
+			if (p.back() != '/') p.push_back('/');
+			string fullpath = fname.insert(0, p);
+			map<string, any> lm = read_parquet((char *)fullpath.c_str(), footkey, col1key, col2key);
+			vector<pair<int64_t, string>> rm = fuzz_ts_rangeof(lm, start_key, end_key, lastts);
+			res.insert(res.end(), rm.begin(), rm.end());
+		}
+	}
+	map<string, any> resm = parquet_map(res);
+	char foname[128];
+	sprintf(foname, "fuzz-%s-%s-%s.parquet", signal, start_key, end_key);
+	write_parquet(foname, footkey, col1key, col2key, resm);
+}
+
+void
+pt_fuzz(char *signal, char *start_key, char *end_key, char *dir)
+{
+	pt_decfuzz(signal, NULL, NULL, NULL, start_key, end_key, dir);
+}
