@@ -73,11 +73,12 @@ try {
 	shared_ptr<parquet::ParquetFileWriter> file_writer =
 	    parquet::ParquetFileWriter::Open(out_file, _schema, props);
 
+	ptlog("parquet writter init done");
+
 	// Append a RowGroup with a specific number of rows.
 	parquet::RowGroupWriter *rg_writer = file_writer->AppendRowGroup();
 
 	// Write the Int64 column
-	ptlog("start doing int64 write");
 	list<int64_t> col1 = any_cast<list<int64_t>>(lm[path_int64]);
 	list<int64_t>::iterator it1 = col1.begin();
 	parquet::Int64Writer *int64_writer =
@@ -88,7 +89,6 @@ try {
 		int64_writer->WriteBatch(1, &definition_level, nullptr, &value);
 		it1++;
 	}
-	ptlog("end doing int64 write");
 
 	// Write the ByteArray column. Make every alternate values NULL
 	list<string>  col2 = any_cast<list<string>>(lm[path_str]);
@@ -108,7 +108,7 @@ try {
 		}
 		it2 ++;
 	}
-	ptlog("stop doing ByteArray write");
+	ptlog("key and data has be written to %s", fname);
 
 	// Close the RowGroupWriter
 	rg_writer->Close();
@@ -377,7 +377,7 @@ pt_replay(char *interval, char *url, char *topic, int argc, char **argv)
 }
 
 void
-pt_decsearch(char *col, char *signal, char *footkey, char *col1key, char *col2key, char *start_key, char *end_key, char *dir)
+pt_decsearch(char *signal, char *footkey, char *col1key, char *col2key, char *start_key, char *end_key, char *dir)
 {
 	vector<pair<int64_t, string>> res;
 	vector<string> fv = listdir((const char *)dir, "parquet");
@@ -399,8 +399,8 @@ pt_decsearch(char *col, char *signal, char *footkey, char *col1key, char *col2ke
 }
 
 void
-pt_search(char *col, char *signal, char *start_key, char *end_key, char *dir)
+pt_search(char *signal, char *start_key, char *end_key, char *dir)
 {
-	pt_decsearch(col, signal, NULL, NULL, NULL, start_key, end_key, dir);
+	pt_decsearch(signal, NULL, NULL, NULL, start_key, end_key, dir);
 }
 

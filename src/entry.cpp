@@ -17,7 +17,7 @@ help(char *cmd, const char *ver)
 	printf("Examples:\n");
 	printf("%s sort ts /tmp\n", cmd);
 	printf("%s ls 0 1000 /tmp\n", cmd);
-	printf("%s search data canspi 0 1000 /tmp\n", cmd);
+	printf("%s search canspi 0 1000 /tmp\n", cmd);
 	printf("%s binary key /tmp/foo.parquet /tmp/bar.parquet\n", cmd);
 	printf("%s decrypt both 0123456789012345 0123456789012345 0123456789012345 /tmp/foo.parquet\n", cmd);
 	printf("%s replay 10 mqtt-tcp://127.0.0.1:1883 topic /tmp/foo.parquet\n", cmd);
@@ -29,10 +29,10 @@ help(char *cmd, const char *ver)
 	printf(":parquet-tool ls <START-KEY> <END-KEY> <DIR>\n");
 	printf(":list parquet files in <DIR> in range of <START-KEY> to <END-KEY>\n");
 	printf(":--------------------------------------------------\n");
-	printf(":parquet-tool search data|both <SIGNAL> <START-KEY> <END-KEY> <DIR>\n");
-	printf(":print data or both in parquet files in <DIR> in range of <START-KEY> to <END-KEY>\n");
+	printf(":parquet-tool search <SIGNAL> <START-KEY> <END-KEY> <DIR>\n");
+	printf(":search records in parquet files in <DIR> in range of <START-KEY> to <END-KEY>\n");
 	printf(":--------------------------------------------------\n");
-	printf(":parquet-tool decsearch data|both <SIGNAL> <FOOT-KEY> <COL1-KEY> <COL2-KEY> <START-KEY> <END-KEY> <DIR>\n");
+	printf(":parquet-tool decsearch <SIGNAL> <FOOT-KEY> <COL1-KEY> <COL2-KEY> <START-KEY> <END-KEY> <DIR>\n");
 	printf(":Combine decrypt and search\n");
 	printf(":--------------------------------------------------\n");
 	printf(":parquet-tool binary key|data|both <FILE...>\n");
@@ -64,11 +64,11 @@ main(int argc, char** argv)
 		pt_sort(argv[2], argv[3]);
 	} else if (0 == strcmp(opt, "ls") && argc == 5) {
 		pt_ls(argv[2], argv[3], argv[4]);
-	} else if (0 == strcmp(opt, "search") && argc == 7) {
-		pt_search(argv[2], argv[3], argv[4], argv[5], argv[6]);
-	} else if (0 == strcmp(opt, "dersearch") && argc == 10) {
+	} else if (0 == strcmp(opt, "search") && argc == 6) {
+		pt_search(argv[2], argv[3], argv[4], argv[5]);
+	} else if (0 == strcmp(opt, "decsearch") && argc == 9) {
 		pt_decsearch(argv[2], argv[3], argv[4], argv[5],
-			argv[6], argv[7], argv[8], argv[9]);
+			argv[6], argv[7], argv[8]);
 	} else if (0 == strcmp(opt, "binary") && argc > 3) {
 		pt_binary(argv[2], argc-3, argv + 3);
 	} else if (0 == strcmp(opt, "decrypt") && argc > 6) {
