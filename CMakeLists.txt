@@ -10,9 +10,32 @@ if (DEBUG)
 	endif (ASAN)
 endif (DEBUG)
 
+set(DEPS
+	boost_filesystem
+	boost_thread
+	boost_system
+	boost_serialization
+	pthread
+	boost_chrono
+	arrow
+	parquet
+	nng)
+
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/inc)
-file(GLOB APP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
+
+set(SOURCES
+	src/file.cpp
+	src/log.cpp
+	src/mqtt.cpp
+	src/parquet.cpp)
+
 add_executable(parquet-tool
-	${APP_SOURCES})
-target_link_libraries(parquet-tool boost_filesystem boost_thread boost_system boost_serialization pthread boost_chrono arrow parquet nng)
+	src/entry.cpp
+	${SOURCES})
+target_link_libraries(parquet-tool ${DEPS})
+
+add_executable(test_parquet
+	src/test_parquet.cpp
+	${SOURCES})
+target_link_libraries(test_parquet ${DEPS})
 
