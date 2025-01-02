@@ -213,6 +213,21 @@ read_parquet(char *fname, const char *footkey, const char *col1key, const char *
 	return lm;
 }
 
+map<string, any>
+parquet_map(vector<pair<int64_t, string>> fv)
+{
+	map<string, any> fm;
+	list<int64_t> lk;
+	list<string>  lp;
+	for (auto x : fv) {
+		lk.push_back(x.first);
+		lp.push_back(x.second);
+	}
+	fm[path_int64] = lk;
+	fm[path_str]   = lp;
+	return fm;
+}
+
 static void
 showvector(vector<pair<int64_t, string>> res, char *col)
 {
@@ -395,7 +410,10 @@ pt_decsearch(char *signal, char *footkey, char *col1key, char *col2key, char *st
 		}
 	}
 	sort(res.begin(), res.end(), compare_by_col1);
-	showvector(res, col);
+	map<string, any> resm = parquet_map(res);
+	char foname[128];
+	sprintf(foname, "%s-%s-%s.parquet", signal, start_key, end_key);
+	write_parquet(foname, footkey, col1key, col2key, resm);
 }
 
 void
