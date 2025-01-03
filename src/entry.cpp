@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <unistd.h>
 #include <cstring>
 #include <cstdlib>
 
@@ -16,6 +17,45 @@ help_ls()
 	printf(":\n");
 	printf(": -r range\n");
 	printf(": -d directory\n");
+	exit(0);
+}
+
+void
+entry_ls(int argc, char **argv)
+{
+	char c;
+	char *range = NULL;
+	char *dir   = NULL;
+	char *start_key, *end_key;
+	while ((c = getopt(argc, argv, ":r:d:")) != -1) {
+		switch (c) {
+		case 'r':
+			range = strdup(optarg);
+			break;
+		case 'd':
+			dir = optarg;
+			break;
+		}
+	}
+	if (range == NULL) {
+		pterr("null argument range");
+		help_ls();
+	}
+	if (dir == NULL) {
+		pterr("null argument dir");
+		help_ls();
+	}
+	start_key = range;
+	end_key   = (char *)strstr(range, ",");
+	if (end_key == NULL) {
+		pterr("null argument end_key");
+		help_ls();
+	}
+	end_key[0] = '\0';
+	end_key ++;
+	pt_ls(start_key, end_key, dir);
+	if (range)
+		free(range);
 }
 
 void
@@ -110,10 +150,10 @@ main(int argc, char** argv)
 	}
 	ptlog_init();
 	opt = argv[1];
-	if (0 == strcmp(opt, "sort") && argc == 4) {
+	if (0 == strcmp(opt, "ls")) {
+		entry_ls(argc, argv);
+	} else if (0 == strcmp(opt, "sort") && argc == 4) {
 		pt_sort(argv[2], argv[3]);
-	} else if (0 == strcmp(opt, "ls") && argc == 5) {
-		pt_ls(argv[2], argv[3], argv[4]);
 	} else if (0 == strcmp(opt, "search") && argc == 6) {
 		pt_search(argv[2], argv[3], argv[4], argv[5]);
 	} else if (0 == strcmp(opt, "decsearch") && argc == 9) {

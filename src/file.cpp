@@ -145,20 +145,8 @@ pt_sort(char *key, char *dir)
 void
 pt_ls(char *start_key, char *end_key, char *dir)
 {
-	if (start_key == NULL) {
-		ptlog("null argument start_key");
-		return;
-	}
-	if (end_key == NULL) {
-		ptlog("null argument end_key");
-		return;
-	}
-	if (dir == NULL) {
-		ptlog("null argument dir");
-		return;
-	}
 	if (stoll(start_key) > stoll(end_key)) {
-		ptlog("Invalid start_key or end_key, start_key should LessEqual than end_key");
+		pterr("Invalid start_key or end_key, start_key should LessEqual than end_key");
 		return;
 	}
 
