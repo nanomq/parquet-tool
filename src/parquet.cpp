@@ -108,7 +108,7 @@ try {
 		}
 		it2 ++;
 	}
-	ptlog("key and data has be written to %s", fname);
+	ptlog("%ld records has be written to %s", col2.size(), fname);
 
 	// Close the RowGroupWriter
 	rg_writer->Close();

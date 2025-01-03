@@ -165,6 +165,62 @@ help_search()
 }
 
 void
+entry_search(int argc, char **argv)
+{
+	char c;
+	char *sig   = NULL;
+	char *range = NULL;
+	char *dir   = NULL;
+	char *fk    = NULL;
+	char *c1k   = NULL;
+	char *c2k   = NULL;
+	char *start_key, *end_key;
+	while ((c = getopt(argc, argv, ":s:r:d:x:y:z:")) != -1) {
+		switch (c) {
+		case 's':
+			sig = optarg;
+			break;
+		case 'r':
+			range = strdup(optarg);
+			break;
+		case 'd':
+			dir = optarg;
+			break;
+		case 'x':
+			fk = optarg;
+			break;
+		case 'y':
+			c1k = optarg;
+			break;
+		case 'z':
+			c2k = optarg;
+			break;
+		}
+	}
+	if (sig == NULL) {
+		pterr("null argument signal");
+		help_search();
+	}
+	if (range == NULL) {
+		pterr("null argument range");
+		help_search();
+	}
+	if (dir == NULL) {
+		pterr("null argument dir");
+		help_search();
+	}
+	start_key = range;
+	end_key   = (char *)strstr(range, ",");
+	if (end_key == NULL) {
+		pterr("null argument end_key");
+		help_search();
+	}
+	end_key[0] = '\0';
+	end_key ++;
+	pt_search(sig, start_key, end_key, dir);
+}
+
+void
 help_fuzz()
 {
 	printf(":parquet-tool fuzz -s SIGNAL -r START,END -d DIR\n");
@@ -227,13 +283,8 @@ main(int argc, char** argv)
 		entry_sort(argc, argv);
 	} else if (0 == strcmp(opt, "cat")) {
 		entry_cat(argc, argv);
-	} else if (0 == strcmp(opt, "search") && argc == 6) {
-		pt_search(argv[2], argv[3], argv[4], argv[5]);
-	} else if (0 == strcmp(opt, "decsearch") && argc == 9) {
-		pt_decsearch(argv[2], argv[3], argv[4], argv[5],
-			argv[6], argv[7], argv[8]);
-	} else if (0 == strcmp(opt, "decrypt") && argc > 6) {
-		pt_decrypt(argv[2], argv[3], argv[4], argv[5], argc-6, argv + 6);
+	} else if (0 == strcmp(opt, "search")) {
+		entry_search(argc, argv);
 	} else if (0 == strcmp(opt, "replay") && argc > 5) {
 		pt_replay(argv[2], argv[3], argv[4], argc-5, argv + 5);
 	} else if (0 == strcmp(opt, "decreplay") && argc > 8) {
