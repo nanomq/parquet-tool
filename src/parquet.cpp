@@ -352,23 +352,10 @@ compare_by_col1(pair<int64_t, string> a, pair<int64_t, string> b) {
 }
 
 void
-pt_binary(char *col, int argc, char **argv)
+pt_binary(char *col, char *fname)
 {
-	if (col == NULL) {
-		ptlog("null argument col");
-		return;
-	}
-	for (int i=0; i<argc; ++i) {
-		if (argv[i] == NULL) {
-			ptlog("null argument No.%d filename", i);
-			return;
-		}
-	}
-
-	for (int i=0; i<argc; ++i) {
-		map<string, any> lm = read_parquet(argv[i], NULL, NULL, NULL);
-		showparquet(lm, col);
-	}
+	map<string, any> lm = read_parquet(fname, NULL, NULL, NULL);
+	showparquet(lm, col);
 }
 
 void

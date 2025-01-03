@@ -111,6 +111,45 @@ help_cat()
 }
 
 void
+entry_cat(int argc, char **argv)
+{
+	char c;
+	char *col  = NULL;
+	char *file = NULL;
+	char *fk   = NULL;
+	char *c1k  = NULL;
+	char *c2k  = NULL;
+	while ((c = getopt(argc, argv, ":c:f:x:y:z:")) != -1) {
+		switch (c) {
+		case 'c':
+			col = optarg;
+			break;
+		case 'f':
+			file = optarg;
+			break;
+		case 'x':
+			fk = optarg;
+			break;
+		case 'y':
+			c1k = optarg;
+			break;
+		case 'z':
+			c2k = optarg;
+			break;
+		}
+	}
+	if (col == NULL) {
+		pterr("null argument column");
+		help_cat();
+	}
+	if (file == NULL) {
+		pterr("null argument file");
+		help_cat();
+	}
+	pt_binary(col, file);
+}
+
+void
 help_search()
 {
 	printf(":parquet-tool search -s SIGNAL -r START,END -d DIR\n");
@@ -186,13 +225,13 @@ main(int argc, char** argv)
 		entry_ls(argc, argv);
 	} else if (0 == strcmp(opt, "sort")) {
 		entry_sort(argc, argv);
+	} else if (0 == strcmp(opt, "cat")) {
+		entry_cat(argc, argv);
 	} else if (0 == strcmp(opt, "search") && argc == 6) {
 		pt_search(argv[2], argv[3], argv[4], argv[5]);
 	} else if (0 == strcmp(opt, "decsearch") && argc == 9) {
 		pt_decsearch(argv[2], argv[3], argv[4], argv[5],
 			argv[6], argv[7], argv[8]);
-	} else if (0 == strcmp(opt, "binary") && argc > 3) {
-		pt_binary(argv[2], argc-3, argv + 3);
 	} else if (0 == strcmp(opt, "decrypt") && argc > 6) {
 		pt_decrypt(argv[2], argv[3], argv[4], argv[5], argc-6, argv + 6);
 	} else if (0 == strcmp(opt, "replay") && argc > 5) {
