@@ -236,6 +236,63 @@ help_fuzz()
 }
 
 void
+entry_fuzz(int argc, char **argv)
+{
+	char c;
+	char *sig   = NULL;
+	char *range = NULL;
+	char *dir   = NULL;
+	char *fk    = NULL;
+	char *c1k   = NULL;
+	char *c2k   = NULL;
+	char *start_key, *end_key;
+	while ((c = getopt(argc, argv, ":s:r:d:x:y:z:")) != -1) {
+		switch (c) {
+		case 's':
+			sig = optarg;
+			break;
+		case 'r':
+			range = strdup(optarg);
+			break;
+		case 'd':
+			dir = optarg;
+			break;
+		case 'x':
+			fk = optarg;
+			break;
+		case 'y':
+			c1k = optarg;
+			break;
+		case 'z':
+			c2k = optarg;
+			break;
+		}
+	}
+	if (sig == NULL) {
+		pterr("null argument signal");
+		help_fuzz();
+	}
+	if (range == NULL) {
+		pterr("null argument range");
+		help_fuzz();
+	}
+	if (dir == NULL) {
+		pterr("null argument dir");
+		help_fuzz();
+	}
+	start_key = range;
+	end_key   = (char *)strstr(range, ",");
+	if (end_key == NULL) {
+		pterr("null argument end_key");
+		help_fuzz();
+	}
+	end_key[0] = '\0';
+	end_key ++;
+	pt_fuzz(sig, start_key, end_key, dir);
+}
+
+
+void
 help_replay()
 {
 	printf(":parquet-tool replay -i INTERVAL -u MQTT-URL -t TOPIC -f FILE\n");
@@ -285,14 +342,12 @@ main(int argc, char** argv)
 		entry_cat(argc, argv);
 	} else if (0 == strcmp(opt, "search")) {
 		entry_search(argc, argv);
+	} else if (0 == strcmp(opt, "fuzz")) {
+		entry_fuzz(argc, argv);
 	} else if (0 == strcmp(opt, "replay") && argc > 5) {
 		pt_replay(argv[2], argv[3], argv[4], argc-5, argv + 5);
 	} else if (0 == strcmp(opt, "decreplay") && argc > 8) {
 		pt_decreplay(argv[2], argv[3], argv[4], argv[5], argv[6], argv[7], argc-8, argv + 8);
-	} else if (0 == strcmp(opt, "fuzz") && argc == 6) {
-		pt_fuzz(argv[2], argv[3], argv[4], argv[5]);
-	} else if (0 == strcmp(opt, "decfuzz") && argc == 9) {
-		pt_decfuzz(argv[2], argv[3], argv[4], argv[5], argv[6], argv[7], argv[8]);
 	} else if (0 == strcmp(opt, "version")) {
 		printf("%s", PARQUET_TOOL_VERSION);
 	} else {
