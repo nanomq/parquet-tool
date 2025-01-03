@@ -124,16 +124,8 @@ search_range(map<string, vector<string>> fm, char *start_key, char *end_key)
 void
 pt_sort(char *key, char *dir)
 {
-	if (key == NULL) {
-		ptlog("null argument key");
-		return;
-	}
 	if (0 != strcmp(key, "ts") && 0 != strcmp(key, "signal")) {
 		ptlog("invalid argument key.");
-		return;
-	}
-	if (dir == NULL) {
-		ptlog("null argument dir");
 		return;
 	}
 

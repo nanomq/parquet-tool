@@ -66,6 +66,34 @@ help_sort()
 	printf(":\n");
 	printf(": -k key\n");
 	printf(": -d directory\n");
+	exit(0);
+}
+
+void
+entry_sort(int argc, char **argv)
+{
+	char c;
+	char *key = NULL;
+	char *dir = NULL;
+	while ((c = getopt(argc, argv, ":k:d:")) != -1) {
+		switch (c) {
+		case 'k':
+			key = optarg;
+			break;
+		case 'd':
+			dir = optarg;
+			break;
+		}
+	}
+	if (key == NULL) {
+		pterr("null argument key");
+		help_sort();
+	}
+	if (dir == NULL) {
+		pterr("null argument dir");
+		help_sort();
+	}
+	pt_sort(key, dir);
 }
 
 void
@@ -152,8 +180,8 @@ main(int argc, char** argv)
 	opt = argv[1];
 	if (0 == strcmp(opt, "ls")) {
 		entry_ls(argc, argv);
-	} else if (0 == strcmp(opt, "sort") && argc == 4) {
-		pt_sort(argv[2], argv[3]);
+	} else if (0 == strcmp(opt, "sort")) {
+		entry_sort(argc, argv);
 	} else if (0 == strcmp(opt, "search") && argc == 6) {
 		pt_search(argv[2], argv[3], argv[4], argv[5]);
 	} else if (0 == strcmp(opt, "decsearch") && argc == 9) {
