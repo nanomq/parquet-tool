@@ -107,6 +107,7 @@ help_cat()
 	printf(": -x footer key\n");
 	printf(": -y column1 key\n");
 	printf(": -z column2 key\n");
+	exit(0);
 }
 
 void
@@ -121,6 +122,7 @@ help_search()
 	printf(": -x footer key\n");
 	printf(": -y column1 key\n");
 	printf(": -z column2 key\n");
+	exit(0);
 }
 
 void
@@ -135,6 +137,7 @@ help_fuzz()
 	printf(": -x footer key\n");
 	printf(": -y column1 key\n");
 	printf(": -z column2 key\n");
+	exit(0);
 }
 
 void
@@ -150,6 +153,7 @@ help_replay()
 	printf(": -x footer key\n");
 	printf(": -y column1 key\n");
 	printf(": -z column2 key\n");
+	exit(0);
 }
 
 void
