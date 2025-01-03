@@ -7,14 +7,10 @@
 
 // Public
 
-void pt_cat(char *col, char *fname);
-void pt_decrypt(char *col, char *footkey, char *col1key, char *col2key, int argc, char **argv);
-void pt_replay(char *interval, char *url, char *topic, char *file);
-void pt_decreplay(char *footkey, char *col1key, char *col2key, char *interval, char *url, char *topic, char *file);
-void pt_search(char *signal, char *start_key, char *end_key, char *dir);
-void pt_decsearch(char *signal, char *footkey, char *col1key, char *col2key, char *start_key, char *end_key, char *dir);
-void pt_fuzz(char *signal, char *start_key, char *end_key, char *dir);
-void pt_decfuzz(char *signal, char *footkey, char *col1key, char *col2key, char *start_key, char *end_key, char *dir);
+void pt_cat(char *col, char *fname, char *footkey, char *col1key, char *col2key);
+void pt_search(char *signal, char *start_key, char *end_key, char *dir, char *footkey, char *col1key, char *col2key);
+void pt_fuzz(char *signal, char *start_key, char *end_key, char *dir, char *footkey, char *col1key, char *col2key);
+void pt_replay(char *interval, char *url, char *topic, char *file, char *footkey, char *col1key, char *col2key);
 
 // Expose for testing
 using namespace std;

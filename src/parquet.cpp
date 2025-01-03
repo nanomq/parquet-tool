@@ -352,34 +352,14 @@ compare_by_col1(pair<int64_t, string> a, pair<int64_t, string> b) {
 }
 
 void
-pt_cat(char *col, char *fname)
+pt_cat(char *col, char *fname, char *footkey, char *col1key, char *col2key)
 {
-	map<string, any> lm = read_parquet(fname, NULL, NULL, NULL);
+	map<string, any> lm = read_parquet(fname, footkey, col1key, col2key);
 	showparquet(lm, col);
 }
 
 void
-pt_decrypt(char *col, char *footkey, char *col1key, char *col2key, int argc, char **argv)
-{
-	if (col == NULL) {
-		ptlog("null argument col");
-		return;
-	}
-	for (int i=0; i<argc; ++i) {
-		if (argv[i] == NULL) {
-			ptlog("null argument No.%d filename", i);
-			return;
-		}
-	}
-
-	for (int i=0; i<argc; ++i) {
-		map<string, any> lm = read_parquet(argv[i], footkey, col1key, col2key);
-		showparquet(lm, col);
-	}
-}
-
-void
-pt_decreplay(char *footkey, char *col1key, char *col2key, char *interval, char *url, char *topic, char *file)
+pt_replay(char *interval, char *url, char *topic, char *file, char *footkey, char *col1key, char *col2key)
 {
 	nng_socket sock;
 	mqtt_connect(&sock, url);
@@ -404,13 +384,7 @@ pt_decreplay(char *footkey, char *col1key, char *col2key, char *interval, char *
 }
 
 void
-pt_replay(char *interval, char *url, char *topic, char *file)
-{
-	pt_decreplay(NULL, NULL, NULL, interval, url, topic, file);
-}
-
-void
-pt_decsearch(char *signal, char *footkey, char *col1key, char *col2key, char *start_key, char *end_key, char *dir)
+pt_search(char *signal, char *start_key, char *end_key, char *dir, char *footkey, char *col1key, char *col2key)
 {
 	vector<pair<int64_t, string>> res;
 	vector<string> fv = listdir((const char *)dir, "parquet");
@@ -435,13 +409,7 @@ pt_decsearch(char *signal, char *footkey, char *col1key, char *col2key, char *st
 }
 
 void
-pt_search(char *signal, char *start_key, char *end_key, char *dir)
-{
-	pt_decsearch(signal, NULL, NULL, NULL, start_key, end_key, dir);
-}
-
-void
-pt_decfuzz(char *signal, char *footkey, char *col1key, char *col2key, char *start_key, char *end_key, char *dir)
+pt_fuzz(char *signal, char *start_key, char *end_key, char *dir, char *footkey, char *col1key, char *col2key)
 {
 	int64_t lastts = 0;
 	vector<pair<int64_t, string>> res;
@@ -465,8 +433,3 @@ pt_decfuzz(char *signal, char *footkey, char *col1key, char *col2key, char *star
 	write_parquet(foname, footkey, col1key, col2key, resm);
 }
 
-void
-pt_fuzz(char *signal, char *start_key, char *end_key, char *dir)
-{
-	pt_decfuzz(signal, NULL, NULL, NULL, start_key, end_key, dir);
-}
