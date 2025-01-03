@@ -379,36 +379,34 @@ pt_decrypt(char *col, char *footkey, char *col1key, char *col2key, int argc, cha
 }
 
 void
-pt_decreplay(char *footkey, char *col1key, char *col2key, char *interval, char *url, char *topic, int argc, char **argv)
+pt_decreplay(char *footkey, char *col1key, char *col2key, char *interval, char *url, char *topic, char *file)
 {
 	nng_socket sock;
 	mqtt_connect(&sock, url);
 	int timepast = 0; // ms
 
-	for (int i=0; i<argc; ++i) {
-		map<string, any> lm = read_parquet(argv[i], footkey, col1key, col2key);
-		if (lm.end() == lm.find(path_str)) {
-			ptlog("No data found");
-			continue;
-		}
-		int cnt = 0;
-		list<string> col2 = any_cast<list<string>>(lm[path_str]);
-		list<string>::iterator it2 = col2.begin();
-		while (col2.end() != it2) {
-			mqtt_publish(sock, topic, it2->c_str(), it2->length());
-			ptlog("%.*X", it2->length(), it2->c_str());
-			it2++; cnt++;
-			usleep(stoi(interval) * 1000);
-			if ((timepast += stoi(interval)) % 5000 == 0)
-				ptlog("sent %d msgs in %s", cnt, argv[i]);
-		}
+	map<string, any> lm = read_parquet(file, footkey, col1key, col2key);
+	if (lm.end() == lm.find(path_str)) {
+		pterr("No data found");
+		return;
+	}
+	int cnt = 0;
+	list<string> col2 = any_cast<list<string>>(lm[path_str]);
+	list<string>::iterator it2 = col2.begin();
+	while (col2.end() != it2) {
+		mqtt_publish(sock, topic, it2->c_str(), it2->length());
+		ptlog("%.*X", it2->length(), it2->c_str());
+		it2++; cnt++;
+		usleep(stoi(interval) * 1000);
+		if ((timepast += stoi(interval)) % 5000 == 0)
+			ptlog("sent %d msgs in %s", cnt, file);
 	}
 }
 
 void
-pt_replay(char *interval, char *url, char *topic, int argc, char **argv)
+pt_replay(char *interval, char *url, char *topic, char *file)
 {
-	pt_decreplay(NULL, NULL, NULL, interval, url, topic, argc, argv);
+	pt_decreplay(NULL, NULL, NULL, interval, url, topic, file);
 }
 
 void

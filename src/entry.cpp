@@ -291,7 +291,6 @@ entry_fuzz(int argc, char **argv)
 	pt_fuzz(sig, start_key, end_key, dir);
 }
 
-
 void
 help_replay()
 {
@@ -307,6 +306,63 @@ help_replay()
 	printf(": -z column2 key\n");
 	exit(0);
 }
+
+void
+entry_replay(int argc, char **argv)
+{
+	char c;
+	char *itv   = NULL;
+	char *url   = NULL;
+	char *topic = NULL;
+	char *file  = NULL;
+	char *fk    = NULL;
+	char *c1k   = NULL;
+	char *c2k   = NULL;
+	char *start_key, *end_key;
+	while ((c = getopt(argc, argv, ":i:u:t:f:x:y:z:")) != -1) {
+		switch (c) {
+		case 'i':
+			itv = optarg;
+			break;
+		case 'u':
+			url = optarg;
+			break;
+		case 't':
+			topic = optarg;
+			break;
+		case 'f':
+			file = optarg;
+			break;
+		case 'x':
+			fk = optarg;
+			break;
+		case 'y':
+			c1k = optarg;
+			break;
+		case 'z':
+			c2k = optarg;
+			break;
+		}
+	}
+	if (itv == NULL) {
+		pterr("null argument interval");
+		help_replay();
+	}
+	if (url == NULL) {
+		pterr("null argument url");
+		help_replay();
+	}
+	if (topic == NULL) {
+		pterr("null argument topic");
+		help_replay();
+	}
+	if (file == NULL) {
+		pterr("null argument file");
+		help_replay();
+	}
+	pt_replay(itv, url, topic, file);
+}
+
 
 void
 help(char *cmd, const char *ver)
@@ -344,14 +400,12 @@ main(int argc, char** argv)
 		entry_search(argc, argv);
 	} else if (0 == strcmp(opt, "fuzz")) {
 		entry_fuzz(argc, argv);
-	} else if (0 == strcmp(opt, "replay") && argc > 5) {
-		pt_replay(argv[2], argv[3], argv[4], argc-5, argv + 5);
-	} else if (0 == strcmp(opt, "decreplay") && argc > 8) {
-		pt_decreplay(argv[2], argv[3], argv[4], argv[5], argv[6], argv[7], argc-8, argv + 8);
+	} else if (0 == strcmp(opt, "replay")) {
+		entry_replay(argc, argv);
 	} else if (0 == strcmp(opt, "version")) {
 		printf("%s", PARQUET_TOOL_VERSION);
 	} else {
-		ptlog("number of args wrong or invalid option\n");
+		ptlog("number of args wrong or invalid cmd\n");
 		help(cmd, PARQUET_TOOL_VERSION);
 	}
 	return 0;
