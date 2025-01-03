@@ -352,7 +352,7 @@ compare_by_col1(pair<int64_t, string> a, pair<int64_t, string> b) {
 }
 
 void
-pt_binary(char *col, char *fname)
+pt_cat(char *col, char *fname)
 {
 	map<string, any> lm = read_parquet(fname, NULL, NULL, NULL);
 	showparquet(lm, col);

@@ -146,7 +146,7 @@ entry_cat(int argc, char **argv)
 		pterr("null argument file");
 		help_cat();
 	}
-	pt_binary(col, file);
+	pt_cat(col, file);
 }
 
 void
