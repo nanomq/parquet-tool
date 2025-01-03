@@ -9,50 +9,94 @@
 #define PARQUET_TOOL_VERSION "0.0.2"
 
 void
+help_ls()
+{
+	printf(":parquet-tool ls -r START,END -d DIR\n");
+	printf(":list parquet files in <DIR> in range of <START> to <END>\n");
+	printf(":\n");
+	printf(": -r range\n");
+	printf(": -d directory\n");
+}
+
+void
+help_sort()
+{
+	printf(":parquet-tool sort -k ts|signal -d DIR\n");
+	printf(":sort parquet files in <DIR> with ts or signal\n");
+	printf(":\n");
+	printf(": -k key\n");
+	printf(": -d directory\n");
+}
+
+void
+help_cat()
+{
+	printf(":parquet-tool cat -c key|data|both -f FILE\n");
+	printf(":print key or data or both of them in <FILE>\n");
+	printf(":\n");
+	printf(": -c column\n");
+	printf(": -f file\n");
+	printf(": -x footer key\n");
+	printf(": -y column1 key\n");
+	printf(": -z column2 key\n");
+}
+
+void
+help_search()
+{
+	printf(":parquet-tool search -s SIGNAL -r START,END -d DIR\n");
+	printf(":search records in range of <START> to <END> in parquet files in <DIR>\n");
+	printf(":\n");
+	printf(": -s signal\n");
+	printf(": -r range\n");
+	printf(": -d directory\n");
+	printf(": -x footer key\n");
+	printf(": -y column1 key\n");
+	printf(": -z column2 key\n");
+}
+
+void
+help_fuzz()
+{
+	printf(":parquet-tool fuzz -s SIGNAL -r START,END -d DIR\n");
+	printf(":fuzz search records in range of <START> to <END> in parquet files in <DIR>\n");
+	printf(":\n");
+	printf(": -s signal\n");
+	printf(": -r range\n");
+	printf(": -d directory\n");
+	printf(": -x footer key\n");
+	printf(": -y column1 key\n");
+	printf(": -z column2 key\n");
+}
+
+void
+help_replay()
+{
+	printf(":parquet-tool replay -i INTERVAL -u MQTT-URL -t TOPIC -f FILE\n");
+	printf(":replay datas in FILE to <MQTT-URL> mqtt broker in <INTERVAL>ms\n");
+	printf(":\n");
+	printf(": -i interval\n");
+	printf(": -u url of mqtt broker\n");
+	printf(": -t topic\n");
+	printf(": -f file\n");
+	printf(": -x footer key\n");
+	printf(": -y column1 key\n");
+	printf(": -z column2 key\n");
+}
+
+void
 help(char *cmd, const char *ver)
 {
-	printf("Usage: %s <OPTION>\n", cmd);
+	printf("Usage: %s <CMD>\n", cmd);
 	printf("Parquet tool version %s\n\n", ver);
-	printf("Available options: sort, search, binary, decrypt, replay, version\n");
+	printf("Available commands: ls, sort, cat, search, fuzz, replay, version\n\n");
 	printf("Examples:\n");
-	printf("%s sort ts /tmp\n", cmd);
-	printf("%s ls 0 1000 /tmp\n", cmd);
-	printf("%s search canspi 0 1000 /tmp\n", cmd);
-	printf("%s binary key /tmp/foo.parquet /tmp/bar.parquet\n", cmd);
-	printf("%s decrypt both 0123456789012345 0123456789012345 0123456789012345 /tmp/foo.parquet\n", cmd);
-	printf("%s replay 10 mqtt-tcp://127.0.0.1:1883 topic /tmp/foo.parquet\n", cmd);
-	printf("\n");
-
-	printf(":parquet-tool sort ts|signal <DIR>\n");
-	printf(":sort parquet files in <DIR> with ts or signal\n");
-	printf(":--------------------------------------------------\n");
-	printf(":parquet-tool ls <START-KEY> <END-KEY> <DIR>\n");
-	printf(":list parquet files in <DIR> in range of <START-KEY> to <END-KEY>\n");
-	printf(":--------------------------------------------------\n");
-	printf(":parquet-tool search <SIGNAL> <START-KEY> <END-KEY> <DIR>\n");
-	printf(":search records in parquet files in <DIR> in range of <START-KEY> to <END-KEY>\n");
-	printf(":--------------------------------------------------\n");
-	printf(":parquet-tool decsearch <SIGNAL> <FOOT-KEY> <COL1-KEY> <COL2-KEY> <START-KEY> <END-KEY> <DIR>\n");
-	printf(":Combine decrypt and search\n");
-	printf(":--------------------------------------------------\n");
-	printf(":parquet-tool binary key|data|both <FILE...>\n");
-	printf(":print keys or data or both of them in <FILE...> in binary\n");
-	printf(":--------------------------------------------------\n");
-	printf(":parquet-tool decrypt key|data|both <FOOT-KEY> <COL1-KEY> <COL2-KEY> <FILE...>\n");
-	printf(":decrypt key or data or both in<FILE...> with <FOOT-KEY> <COL1-KEY> <COL2-KEY>\n");
-	printf(":--------------------------------------------------\n");
-	printf(":parquet-tool replay <INTERVAL> <MQTT-URL> <TOPIC> <FILE...>\n");
-	printf(":replay datas in <FILE...> to <MQTT-URL> mqtt broker in <INTERVAL>ms\n");
-	printf(":--------------------------------------------------\n");
-	printf(":parquet-tool decreplay <FOOT-KEY> <COL1-KEY> <COL2-KEY> <INTERVAL> <MQTT-URL> <TOPIC> <FILE...>\n");
-	printf(":Combine decrypt and replay\n");
-	printf(":--------------------------------------------------\n");
-	printf(":parquet-tool fuzz <SIGNAL> <START-KEY> <END-KEY> <DIR>\n");
-	printf(":fuzz search records in parquet files in <DIR> in range of <START-KEY> to <END-KEY>\n");
-	printf(":--------------------------------------------------\n");
-	printf(":parquet-tool decfuzz <SIGNAL> <FOOT-KEY> <COL1-KEY> <COL2-KEY> <START-KEY> <END-KEY> <DIR>\n");
-	printf(":Combine decrypt and fuzz\n");
-	printf("\n");
+	printf("%s ls -r 0,1000 -d /tmp\n", cmd);
+	printf("%s sort -k ts -d /tmp\n", cmd);
+	printf("%s cat -c key -f /tmp/foo.parquet\n", cmd);
+	printf("%s search -s canspi -r 0,1000 -d /tmp\n", cmd);
+	printf("%s fuzz -s canspi -r 0,1000 -d /tmp\n", cmd);
+	printf("%s replay -i 10 -u mqtt-tcp://127.1:1883 -t topic -f /tmp/foo.parquet\n", cmd);
 	exit(0);
 }
 
