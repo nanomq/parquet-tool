@@ -3,7 +3,6 @@
 
 #include <cstdio>
 
-bool is_quiet_mode();
 void ptlog_init();
 
 #if 0
@@ -26,10 +25,8 @@ void ptlog_init();
 
 #define ptlog(format, arg...)                                                 \
 	do { \
-		if (!is_quiet_mode()) { \
-			fprintf(stdout, "%s:%d(%s) " format "\n", __FILE__, __LINE__, \
-			    __FUNCTION__, ##arg);                                     \
-		} \
+		fprintf(stdout, "%s:%d(%s) " format "\n", __FILE__, __LINE__, \
+		    __FUNCTION__, ##arg);                                     \
 	} while (0)
 
 #endif
