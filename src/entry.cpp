@@ -104,7 +104,7 @@ help_cat()
 	printf(":\n");
 	printf(": -c column\n");
 	printf(": -f file\n");
-	printf(": -m delimiter (\'n by default)\n");
+	printf(": -m delimiter (\\n by default)\n");
 	printf(": -x footer key\n");
 	printf(": -y column1 key\n");
 	printf(": -z column2 key\n");
