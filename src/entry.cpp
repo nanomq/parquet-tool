@@ -365,7 +365,7 @@ entry_replay(int argc, char **argv)
 		pterr("null argument file");
 		help_replay();
 	}
-	pt_replay(itv, url, topic, file, fk, c1k, c2k);
+	ipt_replay(itv, url, topic, file, fk, c1k, c2k);
 }
 
 void
