@@ -235,8 +235,7 @@ showvector(vector<pair<int64_t, string>> res, char *col)
 		if (path_str.compare(col) == 0) {
 			for (int i = 0; i < e.second.length(); i++)
 				printf("%c", e.second.c_str()[i]);
-			if (!is_quiet_mode())
-				printf("\n");
+			printf("\n");
 		} else if (strcmp("both", col) == 0) {
 			printf("%lld,", e.first);
 			for (int i = 0; i < e.second.length(); i++)
