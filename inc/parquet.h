@@ -12,7 +12,7 @@ map<string, any> pt_cat(char *col, char *fname, char *deli, char *footkey, char 
 map<string, any> pt_search(char *signal, char *start_key, char *end_key, char *dir, char *footkey, char *col1key, char *col2key);
 map<string, any> pt_fuzz(char *signal, char *start_key, char *end_key, char *dir, char *footkey, char *col1key, char *col2key);
 
-// Internal wrappered API
+// Internal wrappered API for entry.cpp
 void ipt_cat(char *col, char *fname, char *deli, char *footkey, char *col1key, char *col2key);
 void ipt_search(char *signal, char *start_key, char *end_key, char *dir, char *footkey, char *col1key, char *col2key);
 void ipt_fuzz(char *signal, char *start_key, char *end_key, char *dir, char *footkey, char *col1key, char *col2key);

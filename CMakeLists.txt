@@ -29,6 +29,8 @@ set(SOURCES
 	src/mqtt.cpp
 	src/parquet.cpp)
 
+add_library(parquet-tool-shared SHARED ${SOURCES})
+
 add_executable(parquet-tool
 	src/entry.cpp
 	${SOURCES})
