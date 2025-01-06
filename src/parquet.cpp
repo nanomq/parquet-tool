@@ -247,7 +247,7 @@ showvector(vector<pair<int64_t, string>> res, char *col)
 }
 
 static void
-showparquet(map<string, any>& lm, char *col)
+showparquet(map<string, any>& lm, char *col, char *deli)
 {
 	if (lm.end() == lm.find(path_int64) || lm.end() == lm.find(path_str)) {
 		ptlog("No key or data found");
@@ -261,15 +261,21 @@ showparquet(map<string, any>& lm, char *col)
 
 	if (0 == path_int64.compare(string(col))) {
 		while (col1.end() != it1) {
-			printf("%lld\n", *it1);
+			printf("%lld", *it1);
+			if (!deli)
+				printf("\n");
+			else
+				printf("%s", deli);
 			it1++;
 		}
 	} else if (0 == path_str.compare(string(col))) {
 		while (col2.end() != it2) {
 			for (int i = 0; i < it2->length(); i++)
 				printf("%c", it2->c_str()[i]);
-			if (!is_quiet_mode())
+			if (!deli)
 				printf("\n");
+			else
+				printf("%s", deli);
 			it2++;
 		}
 	} else if (0 == strcmp("both", col)) {
@@ -277,7 +283,10 @@ showparquet(map<string, any>& lm, char *col)
 			printf("%lld,", *it1);
 			for (int i = 0; i < it2->length(); i++)
 				printf("%c", it2->c_str()[i]);
-			printf("\n");
+			if (!deli)
+				printf("\n");
+			else
+				printf("%s", deli);
 			it1++;
 			it2++;
 		}
@@ -352,10 +361,10 @@ compare_by_col1(pair<int64_t, string> a, pair<int64_t, string> b) {
 }
 
 void
-pt_cat(char *col, char *fname, char *footkey, char *col1key, char *col2key)
+pt_cat(char *col, char *fname, char *deli, char *footkey, char *col1key, char *col2key)
 {
 	map<string, any> lm = read_parquet(fname, footkey, col1key, col2key);
-	showparquet(lm, col);
+	showparquet(lm, col, deli);
 }
 
 void

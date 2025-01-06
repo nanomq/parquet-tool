@@ -104,6 +104,7 @@ help_cat()
 	printf(":\n");
 	printf(": -c column\n");
 	printf(": -f file\n");
+	printf(": -m delimiter (\'n by default)\n");
 	printf(": -x footer key\n");
 	printf(": -y column1 key\n");
 	printf(": -z column2 key\n");
@@ -116,16 +117,20 @@ entry_cat(int argc, char **argv)
 	char c;
 	char *col  = NULL;
 	char *file = NULL;
+	char *deli = NULL;
 	char *fk   = NULL;
 	char *c1k  = NULL;
 	char *c2k  = NULL;
-	while ((c = getopt(argc, argv, ":c:f:x:y:z:")) != -1) {
+	while ((c = getopt(argc, argv, ":c:f:m:x:y:z:")) != -1) {
 		switch (c) {
 		case 'c':
 			col = optarg;
 			break;
 		case 'f':
 			file = optarg;
+			break;
+		case 'm':
+			deli = optarg;
 			break;
 		case 'x':
 			fk = optarg;
@@ -146,7 +151,7 @@ entry_cat(int argc, char **argv)
 		pterr("null argument file");
 		help_cat();
 	}
-	pt_cat(col, file, fk, c1k, c2k);
+	pt_cat(col, file, deli, fk, c1k, c2k);
 }
 
 void

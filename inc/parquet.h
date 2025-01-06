@@ -7,7 +7,7 @@
 
 // Public
 
-void pt_cat(char *col, char *fname, char *footkey, char *col1key, char *col2key);
+void pt_cat(char *col, char *fname, char *deli, char *footkey, char *col1key, char *col2key);
 void pt_search(char *signal, char *start_key, char *end_key, char *dir, char *footkey, char *col1key, char *col2key);
 void pt_fuzz(char *signal, char *start_key, char *end_key, char *dir, char *footkey, char *col1key, char *col2key);
 void pt_replay(char *interval, char *url, char *topic, char *file, char *footkey, char *col1key, char *col2key);
