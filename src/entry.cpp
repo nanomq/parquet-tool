@@ -151,7 +151,7 @@ entry_cat(int argc, char **argv)
 		pterr("null argument file");
 		help_cat();
 	}
-	pt_cat(col, file, deli, fk, c1k, c2k);
+	ipt_cat(col, file, deli, fk, c1k, c2k);
 }
 
 void
@@ -222,7 +222,7 @@ entry_search(int argc, char **argv)
 	}
 	end_key[0] = '\0';
 	end_key ++;
-	pt_search(sig, start_key, end_key, dir, fk, c1k, c2k);
+	ipt_search(sig, start_key, end_key, dir, fk, c1k, c2k);
 }
 
 void
@@ -293,7 +293,7 @@ entry_fuzz(int argc, char **argv)
 	}
 	end_key[0] = '\0';
 	end_key ++;
-	pt_fuzz(sig, start_key, end_key, dir, fk, c1k, c2k);
+	ipt_fuzz(sig, start_key, end_key, dir, fk, c1k, c2k);
 }
 
 void

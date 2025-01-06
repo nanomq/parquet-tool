@@ -359,15 +359,22 @@ compare_by_col1(pair<int64_t, string> a, pair<int64_t, string> b) {
 	return a.first < b.first;
 }
 
-void
+map<string, any>
 pt_cat(char *col, char *fname, char *deli, char *footkey, char *col1key, char *col2key)
 {
 	map<string, any> lm = read_parquet(fname, footkey, col1key, col2key);
+	return lm;
+}
+
+void
+ipt_cat(char *col, char *fname, char *deli, char *footkey, char *col1key, char *col2key)
+{
+	map<string, any> lm = pt_cat(col, fname, deli, footkey, col1key, col2key);
 	showparquet(lm, col, deli);
 }
 
 void
-pt_replay(char *interval, char *url, char *topic, char *file, char *footkey, char *col1key, char *col2key)
+ipt_replay(char *interval, char *url, char *topic, char *file, char *footkey, char *col1key, char *col2key)
 {
 	nng_socket sock;
 	mqtt_connect(&sock, url);
@@ -391,7 +398,7 @@ pt_replay(char *interval, char *url, char *topic, char *file, char *footkey, cha
 	}
 }
 
-void
+map<string, any>
 pt_search(char *signal, char *start_key, char *end_key, char *dir, char *footkey, char *col1key, char *col2key)
 {
 	vector<pair<int64_t, string>> res;
@@ -411,12 +418,19 @@ pt_search(char *signal, char *start_key, char *end_key, char *dir, char *footkey
 	}
 	sort(res.begin(), res.end(), compare_by_col1);
 	map<string, any> resm = parquet_map(res);
+	return resm;
+}
+
+void
+ipt_search(char *signal, char *start_key, char *end_key, char *dir, char *footkey, char *col1key, char *col2key)
+{
+	map<string, any> resm = pt_search(signal, start_key, end_key, dir, footkey, col1key, col2key);
 	char foname[128];
 	sprintf(foname, "search-%s-%s-%s.parquet", signal, start_key, end_key);
 	write_parquet(foname, footkey, col1key, col2key, resm);
 }
 
-void
+map<string, any>
 pt_fuzz(char *signal, char *start_key, char *end_key, char *dir, char *footkey, char *col1key, char *col2key)
 {
 	int64_t lastts = 0;
@@ -436,8 +450,14 @@ pt_fuzz(char *signal, char *start_key, char *end_key, char *dir, char *footkey, 
 		}
 	}
 	map<string, any> resm = parquet_map(res);
+	return resm;
+}
+
+void
+ipt_fuzz(char *signal, char *start_key, char *end_key, char *dir, char *footkey, char *col1key, char *col2key)
+{
+	map<string, any> resm = pt_fuzz(signal, start_key, end_key, dir, footkey, col1key, col2key);
 	char foname[128];
 	sprintf(foname, "fuzz-%s-%s-%s.parquet", signal, start_key, end_key);
 	write_parquet(foname, footkey, col1key, col2key, resm);
 }
-
