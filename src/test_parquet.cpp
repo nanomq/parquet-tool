@@ -36,7 +36,7 @@ test_rw_parquet()
 void
 test_search()
 {
-	char *output = (char *)"./testdir/nanomq_test_555-6~10.parquet";
+	char *output = (char *)"./testdir/nanomq_test-6~10_555.parquet";
 	char *footkey = NULL;
 	char *col1key = NULL;
 	char *col2key = NULL;
@@ -64,7 +64,7 @@ test_search()
 void
 test_fuzz()
 {
-	char *output = (char *)"./testdir/nanomq_test_555-6~10.parquet";
+	char *output = (char *)"./testdir/nanomq_test-6~10_555.parquet";
 	char *footkey = NULL;
 	char *col1key = NULL;
 	char *col2key = NULL;
