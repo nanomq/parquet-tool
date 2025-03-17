@@ -42,7 +42,7 @@ static string
 fname_end_key(string fname)
 {
 	size_t end_key_start = fname.find("~") + 1;
-	size_t end_key_end   = fname.find(".", end_key_start);
+	size_t end_key_end   = fname.find("_", end_key_start);
 	return fname.substr(end_key_start, end_key_end - end_key_start);
 }
 
@@ -68,6 +68,7 @@ map<string, vector<string>>
 sortby(vector<string> fv, char *key)
 {
 	map<string, vector<string>> fm;
+	// New {prefix}_{signal}-{start_ts}~{end_ts}_{md5}.parquet
 	//{prefix}_{signal}_{md5}-{start_key}~{end_key}.parquet
 	const char *prefix = "nanomq_";
 	for (string& fname: fv) {
@@ -75,7 +76,7 @@ sortby(vector<string> fv, char *key)
 			continue;
 		}
 		size_t signal_start = strlen(prefix);
-		size_t signal_end   = fname.find("_", strlen(prefix));
+		size_t signal_end   = fname.find("-", strlen(prefix));
 		string signal = fname.substr(signal_start, signal_end - signal_start);
 
 		if (fm.find(signal) == fm.end()) {
