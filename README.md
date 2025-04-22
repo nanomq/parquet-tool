@@ -1,15 +1,27 @@
 # Parquet tool for NanoMQ
 
 ## Requires
-* boost
-* parquet
 * nanosdk
+* openssl
+* zstd
+
+```
+# Install openssl and zstd
+apt install openssl-dev zstd
+
+# Install nanosdk
+git clone https://github.com/emqx/NanoSDK ; cd NanoSDK
+git submodule update --init --recursive 
+mkdir build && cd build
+cmake -G Ninja ..
+ninja install
+```
 
 ## Start
 
 ```
 Usage: ./parquet-tool <CMD>
-Parquet tool version 0.0.2
+Parquet tool version 0.0.7
 
 Available commands: ls, sort, cat, search, fuzz, replay, version
 
