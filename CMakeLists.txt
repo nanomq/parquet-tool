@@ -21,6 +21,10 @@ set(DEPS
 	parquet
 	nng)
 
+find_package(Arrow CONFIG REQUIRED)
+find_package(Parquet CONFIG REQUIRED)
+find_package(zstd CONFIG REQUIRED)
+
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/inc)
 
 set(SOURCES
@@ -34,10 +38,10 @@ add_library(parquet-tool-shared SHARED ${SOURCES})
 add_executable(parquet-tool
 	src/entry.cpp
 	${SOURCES})
-target_link_libraries(parquet-tool ${DEPS})
+target_link_libraries(parquet-tool PRIVATE arrow_static parquet_static nng)
 
 add_executable(test_parquet
 	src/test_parquet.cpp
 	${SOURCES})
-target_link_libraries(test_parquet ${DEPS})
+target_link_libraries(test_parquet PRIVATE arrow_static parquet_static nng)
 
