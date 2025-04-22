@@ -7,7 +7,7 @@ on:
     branches: [ main ]
 
 jobs:
-  build:
+  build_upload:
     runs-on: ubuntu-latest
 
     steps:
@@ -21,28 +21,25 @@ jobs:
 
       - name: Configure NanoSDK
         run: |
-          pwd && ls
           git clone https://github.com/emqx/nanosdk.git
           cd nanosdk
-          pwd && ls
           mkdir build && cd build
           cmake ..
           make -j2
+          pwd && ls
           sudo make install
           cd ../../
 
       - name: Configure Parquet
         run: |
-          pwd && ls
           git clone https://github.com/apache/arrow.git
           cd arrow/cpp
           git checkout apache-arrow-14.0.2
-          pwd && ls
           mkdir build && cd build
           cmake -DARROW_PARQUET=ON -DARROW_BUILD_SHARED=OFF -DARROW_WITH_BROTLI=OFF -DARROW_WITH_BZ2=OFF -DARROW_WITH_LZ4=OFF -DARROW_WITH_SNAPPY=OFF -DARROW_WITH_ZLIB=OFF -DARROW_WITH_ZSTD=ON -DARROW_USE_OPENSSL=ON -DPARQUET_REQUIRE_ENCRYPTION=ON ..
           make -j2
+          pwd && ls
           sudo make install
-          cd ../../..
 
       - name: Build
         run: |
@@ -51,8 +48,30 @@ jobs:
           cd build
           cmake ..
           make -j2
+          ldd ./parquet-tool
 
       - name: Run tests
         run: |
           cd build
+          mkdir testdir
           ./test_parquet
+
+      - name: Prepare to release
+        run: |
+          mkdir release
+          mkdir release/parquet-tool-x86
+          mv build/parquet-tool release/parquet-tool-x86/
+          mv nanosdk/build/libnng.* release/parquet-tool-x86/
+          cd release
+          tar -czf parquet-tool-x86.tar.gz parquet-tool-x86
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          prerelease: ${{ steps.prerelease.outputs.prerelease }}
+          generate_release_notes: true
+          token: ${{ github.token }}
+          name: Parquet-Tool ${{ github.ref_name }} Released
+          files: release/*.tar.gz
+
