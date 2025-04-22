@@ -21,13 +21,14 @@ jobs:
 
       - name: Configure NanoSDK
         run: |
+          pwd && ls
           git submodule update --recursive
           cd nanosdk
-          mkdir build
-          cd build
+          pwd && ls
+          mkdir build && cd build
           cmake ..
           make -j2
-          make install
+          sudo make install
 
       - name: Configure CMake
         run: |
