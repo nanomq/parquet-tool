@@ -3,10 +3,10 @@ name: CI Build & Test
 on:
   push:
     tags:
-      - "v*"
+      - "v*.*.*"
 
 jobs:
-  build_upload:
+  build:
     runs-on: ubuntu-latest
 
     steps:
@@ -61,12 +61,13 @@ jobs:
           cd release
           tar -czf parquet-tool-x86.tar.gz parquet-tool-x86
 
-    - name: Create Release
-      uses: softprops/action-gh-release@v2
-      with:
-        prerelease: ${{ steps.prerelease.outputs.prerelease }}
-        generate_release_notes: true
-        token: ${{ github.token }}
-        name: Parquet-Tool ${{ github.ref_name }} Released
-        files: release/*.tar.gz
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        if: github.ref_type == 'tag'
+        with:
+          prerelease: ${{ steps.prerelease.outputs.prerelease }}
+          generate_release_notes: true
+          token: ${{ github.token }}
+          name: Parquet-Tool ${{ github.ref_name }} Released
+          files: release/*.tar.gz
 
