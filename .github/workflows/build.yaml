@@ -36,6 +36,7 @@ jobs:
           pwd && ls
           git clone https://github.com/apache/arrow.git
           cd arrow/cpp
+          git checkout apache-arrow-14.0.2
           pwd && ls
           mkdir build && cd build
           cmake -DARROW_PARQUET=ON -DARROW_BUILD_SHARED=OFF -DARROW_WITH_BROTLI=OFF -DARROW_WITH_BZ2=OFF -DARROW_WITH_LZ4=OFF -DARROW_WITH_SNAPPY=OFF -DARROW_WITH_ZLIB=OFF -DARROW_WITH_ZSTD=ON -DARROW_USE_OPENSSL=ON -DPARQUET_REQUIRE_ENCRYPTION=ON ..
@@ -43,16 +44,12 @@ jobs:
           sudo make install
           cd ../../..
 
-      - name: Configure CMake
+      - name: Build
         run: |
           pwd && ls
           mkdir build
           cd build
           cmake ..
-
-      - name: Build
-        run: |
-          cd build
           make -j2
 
       - name: Run tests
