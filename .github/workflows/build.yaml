@@ -22,16 +22,18 @@ jobs:
       - name: Configure NanoSDK
         run: |
           pwd && ls
-          git submodule update --recursive
+          git clone https://github.com/emqx/nanosdk.git
           cd nanosdk
           pwd && ls
           mkdir build && cd build
           cmake ..
           make -j2
           sudo make install
+          cd ../../
 
       - name: Configure CMake
         run: |
+          pwd && ls
           mkdir build
           cd build
           cmake ..
