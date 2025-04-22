@@ -17,7 +17,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt update
-          sudo apt install -y cmake g++ gcc cmake libboost-all-dev libopenssl-dev zstd git
+          sudo apt install -y cmake g++ gcc cmake libboost-all-dev libssl-dev libzstd-dev git
 
       - name: Configure NanoSDK
         run: |
