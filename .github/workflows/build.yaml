@@ -1,0 +1,46 @@
+name: CI Build & Test
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y cmake g++ gcc cmake libboost-all-dev libopenssl-dev zstd git
+
+      - name: Configure NanoSDK
+        run: |
+          git submodule update --recursive
+          cd nanosdk
+          mkdir build
+          cd build
+          cmake ..
+          make -j2
+          make install
+
+      - name: Configure CMake
+        run: |
+          mkdir build
+          cd build
+          cmake ..
+
+      - name: Build
+        run: |
+          cd build
+          make -j2
+
+      - name: Run tests
+        run: |
+          cd build
+          ./test_parquet
