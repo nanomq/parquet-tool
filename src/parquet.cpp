@@ -126,7 +126,7 @@ try {
 }
 
 map<string, any>
-read_parquet_schema(char *fname, const char *footkey, const char *colkey, const char **schema, uint16_t schema_len)
+read_parquet_schema(char *fname, const char **schema, uint16_t schema_len)
 {
 	map<string, any> lm;
 	std::unique_ptr<parquet::ParquetFileReader> parquet_reader;

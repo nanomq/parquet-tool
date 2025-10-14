@@ -4,6 +4,7 @@
 #include <map>
 #include <string>
 #include <any>
+#include <cstdint>
 
 using namespace std;
 
@@ -21,6 +22,8 @@ void ipt_replay(char *interval, char *url, char *topic, char *file, char *footke
 // Expose for testing
 map<string, any> read_parquet(char *fname,
 	const char *footkey, const char *col1key, const char *col2key);
+map<string, any> read_parquet_schema(char *fname,
+	const char **schema, uint16_t schema_len);
 int write_parquet(char *fname, const char *footkey,
 	const char *col1key, const char *col2key, map<string, any> lm);
 
