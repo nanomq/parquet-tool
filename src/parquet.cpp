@@ -29,8 +29,9 @@
 
 using namespace std;
 
-static string path_int64 = "key";
-static string path_str   = "data";
+static string path_int64  = "key";
+static string path_str    = "data";
+static string path_schema = "schemadata";
 
 int
 write_parquet(char *fname, const char *footkey, const char *col1key, const char *col2key, map<string, any> lm)
@@ -122,6 +123,94 @@ try {
 }
 
 	return 0;
+}
+
+map<string, any>
+read_parquet_schema(char *fname, const char *footkey, const char *colkey, const char **schema, uint16_t schema_len)
+{
+	map<string, any> lm;
+	std::unique_ptr<parquet::ParquetFileReader> parquet_reader;
+	parquet::ReaderProperties reader_properties = parquet::default_reader_properties();
+try {
+	parquet_reader = parquet::ParquetFileReader::OpenFile(fname, false, reader_properties);
+	// Get the File MetaData
+	shared_ptr<parquet::FileMetaData> file_metadata = parquet_reader->metadata();
+	int num_row_groups = file_metadata->num_row_groups();  //Get the number of RowGroups
+	int num_columns = file_metadata->num_columns();   //Get the number of Columns
+	ptlog("%s:num_row_groups=[%d],num_columns=[%d]", fname, num_row_groups, num_columns);
+	// TODO the num_row_groups should always be 1
+	for (int r = 0; r < num_row_groups; ++r) {
+		vector<char *>                 schema_vec;
+		vector<uint64_t>               ts;
+		std::shared_ptr<parquet::RowGroupReader> row_group_reader = parquet_reader->RowGroup(r);
+		std::shared_ptr<parquet::ColumnReader> column_reader;
+		// Get the Column Reader for the Int64 column
+		column_reader = row_group_reader->Column(0);
+		parquet::Int64Reader* int64_reader = static_cast<parquet::Int64Reader*>(column_reader.get());
+		int col1n = 0, colarrn = 0;
+		list<int64_t> col1;
+		vector<list<string>> colarr;
+
+		string strCont;
+		int64_t values_read = 0, rows_read = 0;
+		int16_t definition_level, repetition_level;
+
+		while (int64_reader->HasNext()) {
+			int64_t value;
+			rows_read = int64_reader->ReadBatch(1, &definition_level, &repetition_level, &value, &values_read);
+			if (1 == rows_read && 1 == values_read)  {
+				col1.push_back(std::move(value));
+			}
+			col1n ++;
+		}
+
+		for (int i=1; i<num_columns; ++i) {
+			const char *column_name = file_metadata->schema()->Column(i)->name().c_str();
+			if (schema_len > 0) {
+				bool in_schema = false;
+				for (int j = 0; j < schema_len; j++) {
+					if (strcmp(column_name, schema[j]) == 0) {
+						in_schema = true;
+						break;
+					}
+				}
+				if (!in_schema) {
+					ptlog("Invalid schema, no matching column name schema [%s]", column_name);
+					continue;
+				}
+			}
+
+			column_reader = row_group_reader->Column(i);
+			auto ba_reader = dynamic_pointer_cast<parquet::ByteArrayReader>(column_reader);
+			list<string> col2;
+			int col2n = 0;
+
+			while (ba_reader->HasNext()) {
+				parquet::ByteArray value;
+				rows_read = ba_reader->ReadBatch(1, &definition_level, &repetition_level, &value, &values_read);
+				if (1 == rows_read && 1 == values_read)  {
+					string strTemp = string((char*)value.ptr, value.len);
+					col2.push_back(std::move(strTemp));
+				}
+				col2n ++;
+			}
+			if (colarrn == 0)
+				colarrn = col2n;
+			else
+				if (col2n != colarrn)
+					ptlog("columns in schema payload has different length.");
+
+			colarr.push_back(col2);
+		}
+
+		lm[path_int64] = col1;
+		lm[path_schema] = colarr;
+		return lm;
+	}
+} catch (const std::exception &e) {
+	ptlog("exception_msg=[%s]", e.what());
+}
+	return lm;
 }
 
 map<string, any>
