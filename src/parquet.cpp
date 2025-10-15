@@ -550,3 +550,28 @@ ipt_fuzz(char *signal, char *start_key, char *end_key, char *dir, char *footkey,
 	sprintf(foname, "fuzz-%s-%s-%s.parquet", signal, start_key, end_key);
 	write_parquet(foname, footkey, col1key, col2key, resm);
 }
+
+void
+ipt_schema(char *fname, char *deli)
+{
+	map<string, any> m = read_parquet_schema(fname, NULL, 0);
+	list<int64_t> lk = any_cast<list<int64_t>>(m["key"]);
+	vector<list<string>> larr = any_cast<vector<list<string>>>(m["schemadata"]);
+
+	list<int64_t>::iterator lk_it = lk.begin();
+	for (int i=0; i<larr.size(); ++i) {
+		list<string>& pld = larr[i];
+		printf("%lld", *lk_it);
+		lk_it++;
+		for (auto it = pld.begin(); it != pld.end(); it ++) {
+			printf(", ");
+			string& ele = *it;
+			for (int n=0; n<ele.size(); ++n)
+				printf("%02x", (uint8_t)ele.c_str()[n]);
+		}
+		if (!deli)
+			printf("\n");
+		else
+			printf("%s", deli);
+	}
+}
