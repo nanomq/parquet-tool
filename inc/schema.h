@@ -6,6 +6,6 @@
 
 using namespace std;
 vector<string> read_schemafile_to_vec(char *fname);
-string schema_cat(vector<string> schema_vec, vector<string> src);
+string schema_cat(vector<string>& schema_vec, int64_t ts, vector<string>& src);
 
 #endif

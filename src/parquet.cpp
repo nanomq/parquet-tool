@@ -561,6 +561,7 @@ ipt_schema(char *fname, char *schemafile, char *deli)
 	list<int64_t> lk = any_cast<list<int64_t>>(m["key"]);
 	vector<vector<string>> larr = any_cast<vector<vector<string>>>(m["schemadata"]);
 
+	// Print header line
 	vector<string> schema_vec = read_schemafile_to_vec(schemafile);
 	printf("ts");
 	for (string& ele: schema_vec) {
@@ -571,8 +572,8 @@ ipt_schema(char *fname, char *schemafile, char *deli)
 
 	list<int64_t>::iterator lk_it = lk.begin();
 	for (int i=0; i<larr[0].size(); ++i) {
+		vector<string> row;
 		printf("%lld", *lk_it);
-		lk_it++;
 		for (int j=0; j<larr.size(); ++j) {
 			printf(", ");
 			vector<string>& col = larr[j];
@@ -581,10 +582,12 @@ ipt_schema(char *fname, char *schemafile, char *deli)
 				printf("%02x", (uint8_t)ele.c_str()[n]);
 			if (ele.size() == 0)
 				printf("-");
+			row.push_back(ele);
 		}
 		if (!deli)
 			printf("\n");
 		else
 			printf("%s", deli);
+		lk_it++;
 	}
 }
