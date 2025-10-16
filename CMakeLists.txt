@@ -31,6 +31,7 @@ set(SOURCES
 	src/file.cpp
 	src/log.cpp
 	src/mqtt.cpp
+	src/schema.cpp
 	src/parquet.cpp)
 
 add_library(parquet-tool-shared SHARED ${SOURCES})
