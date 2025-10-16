@@ -25,6 +25,7 @@
 #include <file.h>
 #include <log.h>
 #include <mqtt.h>
+#include <schema.h>
 #include <nng/nng.h>
 
 using namespace std;
@@ -554,11 +555,19 @@ ipt_fuzz(char *signal, char *start_key, char *end_key, char *dir, char *footkey,
 }
 
 void
-ipt_schema(char *fname, char *deli)
+ipt_schema(char *fname, char *schemafile, char *deli)
 {
 	map<string, any> m = read_parquet_schema(fname, NULL, 0);
 	list<int64_t> lk = any_cast<list<int64_t>>(m["key"]);
 	vector<vector<string>> larr = any_cast<vector<vector<string>>>(m["schemadata"]);
+
+	vector<string> schema_vec = read_schemafile_to_vec(schemafile);
+	printf("ts");
+	for (string& ele: schema_vec) {
+		printf(", ");
+		printf("%s", ele.c_str());
+	}
+	printf("\n");
 
 	list<int64_t>::iterator lk_it = lk.begin();
 	for (int i=0; i<larr[0].size(); ++i) {
