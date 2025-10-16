@@ -561,13 +561,13 @@ ipt_schema(char *fname, char *deli)
 	vector<vector<string>> larr = any_cast<vector<vector<string>>>(m["schemadata"]);
 
 	list<int64_t>::iterator lk_it = lk.begin();
-	for (int i=0; i<larr.size(); ++i) {
-		vector<string>& pld = larr[i];
+	for (int i=0; i<larr[0].size(); ++i) {
 		printf("%lld", *lk_it);
 		lk_it++;
-		for (auto it = pld.begin(); it != pld.end(); it ++) {
+		for (int j=0; j<larr.size(); ++j) {
 			printf(", ");
-			string& ele = *it;
+			vector<string>& col = larr[j];
+			string& ele = col[i];
 			for (int n=0; n<ele.size(); ++n)
 				printf("%02x", (uint8_t)ele.c_str()[n]);
 			if (ele.size() == 0)
