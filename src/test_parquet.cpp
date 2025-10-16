@@ -16,10 +16,10 @@ test_r_schema_parquet()
 	char *output = (char *)"./test_schema.parquet";
 	map<string, any> m = read_parquet_schema(output, NULL, 0);
 	list<int64_t> lk = any_cast<list<int64_t>>(m["key"]);
-	vector<list<string>> larr = any_cast<vector<list<string>>>(m["schemadata"]);
+	vector<vector<string>> larr = any_cast<vector<vector<string>>>(m["schemadata"]);
 	list<int64_t>::iterator lk_it = lk.begin();
 	for (int i=0; i<larr.size(); ++i) {
-		list<string>& pld = larr[i];
+		vector<string>& pld = larr[i];
 		printf("%lld", *lk_it);
 		lk_it++;
 		for (auto it = pld.begin(); it != pld.end(); it ++) {
@@ -27,6 +27,8 @@ test_r_schema_parquet()
 			string& ele = *it;
 			for (int n=0; n<ele.size(); ++n)
 				printf("%02x", (uint8_t)ele.c_str()[n]);
+			if (ele.size() == 0)
+				printf("-");
 		}
 		printf("\n");
 	}

@@ -149,7 +149,7 @@ try {
 		parquet::Int64Reader* int64_reader = static_cast<parquet::Int64Reader*>(column_reader.get());
 		int col1n = 0, colarrn = 0;
 		list<int64_t> col1;
-		vector<list<string>> colarr;
+		vector<vector<string>> colarr;
 
 		string strCont;
 		int64_t values_read = 0, rows_read = 0;
@@ -182,7 +182,7 @@ try {
 
 			column_reader = row_group_reader->Column(i);
 			auto ba_reader = dynamic_pointer_cast<parquet::ByteArrayReader>(column_reader);
-			list<string> col2;
+			vector<string> col2;
 			int col2n = 0;
 
 			while (ba_reader->HasNext()) {
@@ -191,6 +191,8 @@ try {
 				if (1 == rows_read && 1 == values_read)  {
 					string strTemp = string((char*)value.ptr, value.len);
 					col2.push_back(std::move(strTemp));
+				} else {
+					col2.push_back(string(""));
 				}
 				col2n ++;
 			}
@@ -556,11 +558,11 @@ ipt_schema(char *fname, char *deli)
 {
 	map<string, any> m = read_parquet_schema(fname, NULL, 0);
 	list<int64_t> lk = any_cast<list<int64_t>>(m["key"]);
-	vector<list<string>> larr = any_cast<vector<list<string>>>(m["schemadata"]);
+	vector<vector<string>> larr = any_cast<vector<vector<string>>>(m["schemadata"]);
 
 	list<int64_t>::iterator lk_it = lk.begin();
 	for (int i=0; i<larr.size(); ++i) {
-		list<string>& pld = larr[i];
+		vector<string>& pld = larr[i];
 		printf("%lld", *lk_it);
 		lk_it++;
 		for (auto it = pld.begin(); it != pld.end(); it ++) {
@@ -568,6 +570,8 @@ ipt_schema(char *fname, char *deli)
 			string& ele = *it;
 			for (int n=0; n<ele.size(); ++n)
 				printf("%02x", (uint8_t)ele.c_str()[n]);
+			if (ele.size() == 0)
+				printf("-");
 		}
 		if (!deli)
 			printf("\n");
