@@ -18,7 +18,7 @@ void ipt_cat(char *col, char *fname, char *deli, char *footkey, char *col1key, c
 void ipt_search(char *signal, char *start_key, char *end_key, char *dir, char *footkey, char *col1key, char *col2key);
 void ipt_fuzz(char *signal, char *start_key, char *end_key, char *dir, char *footkey, char *col1key, char *col2key);
 void ipt_replay(char *interval, char *url, char *topic, char *file, char *footkey, char *col1key, char *col2key);
-void ipt_schema(char *fname, char *deli);
+void ipt_schema(char *fname, char *schemafile, char *deli);
 
 // Expose for testing
 map<string, any> read_parquet(char *fname,

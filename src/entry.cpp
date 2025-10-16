@@ -371,10 +371,11 @@ entry_replay(int argc, char **argv)
 void
 help_schema()
 {
-	printf(":parquet-tool schema -f FILE\n");
+	printf(":parquet-tool schema -f FILE -s SCHEMAFILE\n");
 	printf(":revert schema'ed <FILE> parquet to original packets\n");
 	printf(":\n");
 	printf(": -f file\n");
+	printf(": -s schemafile\n");
 	printf(": -m delimiter (\\n by default)\n");
 	exit(0);
 }
@@ -385,7 +386,8 @@ entry_schema(int argc, char **argv)
 	char c;
 	char *file = NULL;
 	char *deli = NULL;
-	while ((c = getopt(argc, argv, ":f:m:")) != -1) {
+	char *schemafile = NULL;
+	while ((c = getopt(argc, argv, ":f:s:m:")) != -1) {
 		switch (c) {
 		case 'f':
 			file = optarg;
@@ -393,13 +395,21 @@ entry_schema(int argc, char **argv)
 		case 'm':
 			deli = optarg;
 			break;
+		case 's':
+			schemafile = optarg;
+			break;
 		}
 	}
 	if (file == NULL) {
 		pterr("null argument file");
 		help_schema();
 	}
-	ipt_schema(file, deli);
+	if (schemafile == NULL) {
+		pterr("null argument schemafile");
+		help_schema();
+	}
+
+	ipt_schema(file, schemafile, deli);
 }
 
 void
