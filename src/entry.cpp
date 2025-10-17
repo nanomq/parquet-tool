@@ -371,7 +371,7 @@ entry_replay(int argc, char **argv)
 void
 help_schema()
 {
-	printf(":parquet-tool schema -f FILE -s SCHEMAFILE\n");
+	printf(":parquet-tool schema -f FILE\n");
 	printf(":revert schema'ed <FILE> parquet to original packets\n");
 	printf(":\n");
 	printf(": -f file\n");
@@ -402,10 +402,6 @@ entry_schema(int argc, char **argv)
 	}
 	if (file == NULL) {
 		pterr("null argument file");
-		help_schema();
-	}
-	if (schemafile == NULL) {
-		pterr("null argument schemafile");
 		help_schema();
 	}
 

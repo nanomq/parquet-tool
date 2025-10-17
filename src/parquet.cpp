@@ -128,7 +128,7 @@ try {
 }
 
 map<string, any>
-read_parquet_schema(char *fname, const char **schema, uint16_t schema_len)
+read_parquet_schema(char *fname, vector<string>& schema_vec, char *schemafile)
 {
 	map<string, any> lm;
 	std::unique_ptr<parquet::ParquetFileReader> parquet_reader;
@@ -137,12 +137,13 @@ try {
 	parquet_reader = parquet::ParquetFileReader::OpenFile(fname, false, reader_properties);
 	// Get the File MetaData
 	shared_ptr<parquet::FileMetaData> file_metadata = parquet_reader->metadata();
+	if (schemafile)
+		schema_vec = read_schemafile_to_vec(schemafile);
 	int num_row_groups = file_metadata->num_row_groups();  //Get the number of RowGroups
 	int num_columns = file_metadata->num_columns();   //Get the number of Columns
-	ptlog("%s:num_row_groups=[%d],num_columns=[%d]", fname, num_row_groups, num_columns);
+	//ptlog("%s:num_row_groups=[%d],num_columns=[%d]", fname, num_row_groups, num_columns);
 	// TODO the num_row_groups should always be 1
 	for (int r = 0; r < num_row_groups; ++r) {
-		vector<char *>                 schema_vec;
 		vector<uint64_t>               ts;
 		std::shared_ptr<parquet::RowGroupReader> row_group_reader = parquet_reader->RowGroup(r);
 		std::shared_ptr<parquet::ColumnReader> column_reader;
@@ -168,19 +169,8 @@ try {
 
 		for (int i=1; i<num_columns; ++i) {
 			const char *column_name = file_metadata->schema()->Column(i)->name().c_str();
-			if (schema_len > 0) {
-				bool in_schema = false;
-				for (int j = 0; j < schema_len; j++) {
-					if (strcmp(column_name, schema[j]) == 0) {
-						in_schema = true;
-						break;
-					}
-				}
-				if (!in_schema) {
-					ptlog("Invalid schema, no matching column name schema [%s]", column_name);
-					continue;
-				}
-			}
+			if (!schemafile)
+				schema_vec.push_back(string(column_name, strlen(column_name)));
 
 			column_reader = row_group_reader->Column(i);
 			auto ba_reader = dynamic_pointer_cast<parquet::ByteArrayReader>(column_reader);
@@ -558,37 +548,37 @@ ipt_fuzz(char *signal, char *start_key, char *end_key, char *dir, char *footkey,
 void
 ipt_schema(char *fname, char *schemafile, char *deli)
 {
-	map<string, any> m = read_parquet_schema(fname, NULL, 0);
+	vector<string> schema_vec;
+	map<string, any> m = read_parquet_schema(fname, schema_vec, schemafile);
 	list<int64_t> lk = any_cast<list<int64_t>>(m["key"]);
 	vector<vector<string>> larr = any_cast<vector<vector<string>>>(m["schemadata"]);
 
 	// Print header line
-	vector<string> schema_vec = read_schemafile_to_vec(schemafile);
-	printf("ts");
-	for (string& ele: schema_vec) {
-		printf(", ");
-		printf("%s", ele.c_str());
-	}
-	printf("\n");
+	// printf("ts");
+	// for (string& ele: schema_vec) {
+	// 	printf(", ");
+	// 	printf("%s", ele.c_str());
+	// }
+	// printf("\n");
 
 	list<int64_t>::iterator lk_it = lk.begin();
 	for (int i=0; i<larr[0].size(); ++i) {
 		vector<string> row;
-		printf("%lld", *lk_it);
+		//printf("%lld", *lk_it);
 		for (int j=0; j<larr.size(); ++j) {
-			printf(", ");
+			// printf(", ");
 			vector<string>& col = larr[j];
 			string& ele = col[i];
-			for (int n=0; n<ele.size(); ++n)
-				printf("%02x", (uint8_t)ele.c_str()[n]);
-			if (ele.size() == 0)
-				printf("-");
+			// for (int n=0; n<ele.size(); ++n)
+			// 	printf("%02x", (uint8_t)ele.c_str()[n]);
+			// if (ele.size() == 0)
+			// 	printf("-");
 			row.push_back(ele);
 		}
-		if (!deli)
-			printf("\n");
-		else
-			printf("%s", deli);
+		// if (!deli)
+		// 	printf("\n");
+		// else
+		// 	printf("%s", deli);
 
 		// Print sorted datas
 		vector<pair<string, int>> row_sorted = schema_sort(row);
@@ -596,6 +586,11 @@ ipt_schema(char *fname, char *schemafile, char *deli)
 			int idx = p.second;
 			string data = p.first;
 			int64_t ts = *lk_it + (uint64_t)(uint8_t)data.data()[0];
+			if (idx >= schema_vec.size()) {
+				fprintf(stderr, "number of parquet columns is LARGE than schema columss (%d)\n",
+						idx-schema_vec.size()+1);
+				break;
+			}
 			string busid = schema_vec[idx].substr(0, 2);
 			string canid = schema_vec[idx].substr(2, 6);
 			string pld = data.substr(3);
