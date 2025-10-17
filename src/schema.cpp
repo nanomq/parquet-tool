@@ -4,6 +4,8 @@
 #include <cstdint>
 #include <vector>
 #include <fstream>
+#include <utility>
+#include <algorithm>
 
 using namespace std;
 
@@ -125,5 +127,24 @@ schema_cat(vector<string>& schema_vec, int64_t ts, vector<string>& src)
 		append_bigendian_u8(res, packet_sz);
 		append_bigendian(res, src[i]);
 	}
+	return res;
+}
+
+bool cmp_schema_tsdiff(const pair<string, int>& a, const pair<string, int>& b) {
+	return a.first.data()[0] < b.first.data()[0];
+}
+
+vector<pair<string, int>>
+schema_sort(vector<string> row)
+{
+	vector<pair<string, int>> res;
+	for (int i=0; i<row.size(); ++i) {
+		string r = row[i];
+		if (r.size()) {
+			auto p = make_pair(r, i);
+			res.push_back(p);
+		}
+	}
+	sort(res.begin(), res.end(), cmp_schema_tsdiff);
 	return res;
 }

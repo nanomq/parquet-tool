@@ -6,6 +6,7 @@
 #include <memory>
 #include <string>
 #include <map>
+#include <utility>
 #include <vector>
 #include <list>
 #include <iostream>
@@ -588,6 +589,22 @@ ipt_schema(char *fname, char *schemafile, char *deli)
 			printf("\n");
 		else
 			printf("%s", deli);
+
+		// Print sorted datas
+		vector<pair<string, int>> row_sorted = schema_sort(row);
+		for (pair<string, int>& p: row_sorted) {
+			int idx = p.second;
+			string data = p.first;
+			int64_t ts = *lk_it + (uint64_t)(uint8_t)data.data()[0];
+			string busid = schema_vec[idx].substr(0, 2);
+			string canid = schema_vec[idx].substr(2, 6);
+			string pld = data.substr(3);
+			printf("%lld, %s, %s, ", ts, busid.c_str(), canid.c_str());
+			for (int n=0; n<pld.size(); ++n)
+				printf("%02x", (uint8_t)pld.c_str()[n]);
+			printf("\n");
+		}
+
 		lk_it++;
 	}
 }
