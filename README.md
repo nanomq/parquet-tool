@@ -21,9 +21,9 @@ ninja install
 
 ```
 Usage: ./parquet-tool <CMD>
-Parquet tool version 0.0.7
+Parquet tool version 0.0.8
 
-Available commands: ls, sort, cat, search, fuzz, replay, version
+Available commands: ls, sort, cat, search, fuzz, replay, schema, version
 
 Examples:
 ./parquet-tool ls -r 0,1000 -d /tmp
@@ -32,4 +32,5 @@ Examples:
 ./parquet-tool search -s canspi -r 0,1000 -d /tmp
 ./parquet-tool fuzz -s canspi -r 0,1000 -d /tmp
 ./parquet-tool replay -i 10 -u mqtt-tcp://127.1:1883 -t topic -f /tmp/foo.parquet
+./parquet-tool schema -f /tmp/foo-schema.parquet
 ```

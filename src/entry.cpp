@@ -7,7 +7,7 @@
 #include <file.h>
 #include <parquet.h>
 
-#define PARQUET_TOOL_VERSION "0.0.7"
+#define PARQUET_TOOL_VERSION "0.0.8"
 
 void
 help_ls()
