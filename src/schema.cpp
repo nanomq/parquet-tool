@@ -7,6 +7,8 @@
 #include <utility>
 #include <algorithm>
 
+#include <log.h>
+
 using namespace std;
 
 vector<string>
@@ -141,8 +143,26 @@ schema_sort(vector<string> row)
 	for (int i=0; i<row.size(); ++i) {
 		string r = row[i];
 		if (r.size()) {
-			auto p = make_pair(r, i);
-			res.push_back(p);
+			size_t pos = 0;
+			while (pos < r.size()) {
+				if (pos + 3 >= r.size()) {
+					break;
+				}
+				pos += 1; // tsdiff
+				size_t len_i16 = (size_t)(((uint16_t)(r.data()[pos + 0]) << 8) + (uint16_t)r.data()[pos + 1]);
+				if (pos + 2 + len_i16 > r.size()) {
+					pterr("Invalid schemaed payload was found:");
+					for (int z=0; z<r.size(); ++z)
+						fprintf(stderr, "%02x", r.data()[z]);
+					fprintf(stderr, "\n");
+				}
+				string pld = r.substr(pos - 1, pos + 2 + len_i16);
+
+				auto p = make_pair(pld, i);
+				res.push_back(p);
+
+				pos += (2 + len_i16);
+			}
 		}
 	}
 	sort(res.begin(), res.end(), cmp_schema_tsdiff);
