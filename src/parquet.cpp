@@ -593,9 +593,10 @@ ipt_schema(char *fname, char *schemafile, char *deli)
 			}
 			string busid = schema_vec[idx].substr(0, 2);
 			string canid = schema_vec[idx].substr(2, 6);
+			int pldlen = (int)(((uint16_t)(data.data()[1]) << 8) + (uint16_t)data.data()[2]);
 			string pld = data.substr(3);
 			printf("%lld, %s, %s, ", ts, busid.c_str(), canid.c_str());
-			for (int n=0; n<pld.size(); ++n)
+			for (int n=0; n<pldlen; ++n)
 				printf("%02x", (uint8_t)pld.c_str()[n]);
 			printf("\n");
 		}

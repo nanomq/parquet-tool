@@ -153,9 +153,10 @@ schema_sort(vector<string> row)
 				if (pos + 2 + len_i16 > r.size()) {
 					pterr("Invalid schemaed payload was found:");
 					for (int z=0; z<r.size(); ++z)
-						fprintf(stderr, "%02x", r.data()[z]);
+						fprintf(stderr, "%02x", (uint8_t)r.data()[z]);
 					fprintf(stderr, "\n");
 				}
+
 				string pld = r.substr(pos - 1, pos + 2 + len_i16);
 
 				auto p = make_pair(pld, i);
