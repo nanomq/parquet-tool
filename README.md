@@ -21,7 +21,7 @@ ninja install
 
 ```
 Usage: ./parquet-tool <CMD>
-Parquet tool version 0.0.8
+Parquet tool version 0.0.9
 
 Available commands: ls, sort, cat, search, fuzz, replay, schema, version
 
