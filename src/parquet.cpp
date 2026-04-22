@@ -207,6 +207,52 @@ try {
 	return lm;
 }
 
+map<string, string>
+read_parquet_metadata(char *fname, const char *footkey)
+{
+	map<string, string> res;
+	std::unique_ptr<parquet::ParquetFileReader> parquet_reader;
+	parquet::ReaderProperties reader_properties = parquet::default_reader_properties();
+
+	try {
+		parquet_reader = parquet::ParquetFileReader::OpenFile(fname, false, reader_properties);
+		// Get the File MetaData
+		std::shared_ptr<parquet::FileMetaData> file_metadata = parquet_reader->metadata();
+		auto kv = file_metadata->key_value_metadata(); // User metadata
+		int num_row_groups = file_metadata->num_row_groups();  //Get the number of RowGroups
+		int num_columns = file_metadata->num_columns();   //Get the number of Columns
+		// ptlog("%s:num_row_groups=[%d],num_columns=[%d]", fname, num_row_groups, num_columns);
+
+		res["num_row_groups"] = std::to_string(num_row_groups);
+		res["num_columns"]    = std::to_string(num_columns);
+
+		if (!kv) {
+			ptlog("No MetaData found");
+			return res;
+		}
+
+		int idx;
+		if (((idx = kv->FindKey("nmq.created_by")) >= 0) && kv->value(idx).compare("NanoMQ") == 0) {
+			res["nmq.created_by"] = kv->value(idx);
+		} else {
+			ptlog("MetaData found But was not created by NanoMQ");
+			return res;
+		}
+		if ((idx = kv->FindKey("nmq.created_at")) >= 0)   res["nmq.created_at"] = kv->value(idx);
+
+		if ((idx = kv->FindKey("nmq.meta.version")) >= 0) res["nmq.meta.version"] = kv->value(idx);
+		if ((idx = kv->FindKey("nmq.topic")) >= 0)        res["nmq.topic"] = kv->value(idx);
+		if ((idx = kv->FindKey("nmq.enc.cipher")) >= 0)   res["nmq.enc.cipher"] = kv->value(idx);
+		if ((idx = kv->FindKey("nmq.key.id")) >= 0)       res["nmq.key.id"] = kv->value(idx);
+		if ((idx = kv->FindKey("nmq.key.wrap_alg")) >= 0) res["nmq.key.wrap_alg"] = kv->value(idx);
+		if ((idx = kv->FindKey("nmq.key.wrapped")) >= 0)  res["nmq.key.wrapped"] = kv->value(idx);
+		if ((idx = kv->FindKey("number")) >= 0)           res["number"] = kv->value(idx);
+	} catch (const std::exception &e) {
+		ptlog("exception_msg=[%s]", e.what());
+	}
+	return res;
+}
+
 map<string, any>
 read_parquet(char *fname, const char *footkey, const char *col1key, const char *col2key)
 {
@@ -447,6 +493,15 @@ pt_cat(char *col, char *fname, char *deli, char *footkey, char *col1key, char *c
 {
 	map<string, any> lm = read_parquet(fname, footkey, col1key, col2key);
 	return lm;
+}
+
+void
+ipt_metadata(char *fname, char *footkey)
+{
+	map<string, string> md = read_parquet_metadata(fname, footkey);
+	for (auto& x: md) {
+		ptlog("%s: %s", x.first.c_str(), x.second.c_str());
+	}
 }
 
 void

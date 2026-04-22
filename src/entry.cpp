@@ -59,6 +59,40 @@ entry_ls(int argc, char **argv)
 }
 
 void
+help_metadata()
+{
+	printf(":parquet-tool metadata -f FILE\n");
+	printf(":print metadata in <FILE>\n");
+	printf(":\n");
+	printf(": -f file\n");
+	printf(": -x footer key\n");
+	exit(0);
+}
+
+void
+entry_metadata(int argc, char **argv)
+{
+	char c;
+	char *file = NULL;
+	char *fk   = NULL;
+	while ((c = getopt(argc, argv, ":f:x:")) != -1) {
+		switch (c) {
+		case 'f':
+			file = optarg;
+			break;
+		case 'x':
+			fk = optarg;
+			break;
+		}
+	}
+	if (file == NULL) {
+		pterr("null argument file");
+		help_metadata();
+	}
+	ipt_metadata(file, fk);
+}
+
+void
 help_sort()
 {
 	printf(":parquet-tool sort -k ts|signal -d DIR\n");
@@ -413,11 +447,12 @@ help(char *cmd, const char *ver)
 {
 	printf("Usage: %s <CMD>\n", cmd);
 	printf("Parquet tool version %s\n\n", ver);
-	printf("Available commands: ls, sort, cat, search, fuzz, replay, schema, version\n\n");
+	printf("Available commands: ls, sort, cat, metadata, search, fuzz, replay, schema, version\n\n");
 	printf("Examples:\n");
 	printf("%s ls -r 0,1000 -d /tmp\n", cmd);
 	printf("%s sort -k ts -d /tmp\n", cmd);
 	printf("%s cat -c key -f /tmp/foo.parquet\n", cmd);
+	printf("%s metadata -f /tmp/foo.parquet\n", cmd);
 	printf("%s search -s canspi -r 0,1000 -d /tmp\n", cmd);
 	printf("%s fuzz -s canspi -r 0,1000 -d /tmp\n", cmd);
 	printf("%s replay -i 10 -u mqtt-tcp://127.1:1883 -t topic -f /tmp/foo.parquet\n", cmd);
@@ -437,6 +472,8 @@ main(int argc, char** argv)
 	opt = argv[1];
 	if (0 == strcmp(opt, "ls")) {
 		entry_ls(argc, argv);
+	} else if (0 == strcmp(opt, "metadata")) {
+		entry_metadata(argc, argv);
 	} else if (0 == strcmp(opt, "sort")) {
 		entry_sort(argc, argv);
 	} else if (0 == strcmp(opt, "cat")) {
