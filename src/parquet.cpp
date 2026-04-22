@@ -10,7 +10,6 @@
 #include <vector>
 #include <list>
 #include <iostream>
-
 #include <arrow/io/file.h>
 #include <arrow/api.h>
 #include <arrow/io/api.h>
@@ -36,7 +35,7 @@ static string path_str    = "data";
 static string path_schema = "schemadata";
 
 int
-write_parquet(char *fname, const char *footkey, const char *col1key, const char *col2key, map<string, any> lm)
+write_parquet(char *fname, const char *footkey, const char *colkey, map<string, any> lm)
 {
 
 using parquet::ConvertedType;
@@ -67,7 +66,7 @@ try {
 	    ->disable_dictionary(schema[0])
 	    ->compression(static_cast<arrow::Compression::type>(4)); // ZSTD
 
-	// TODO Decrypt
+	// TODO Encrypt
 
 	shared_ptr<parquet::WriterProperties> props = builder.build();
 	using FileClass = arrow::io::FileOutputStream;
@@ -253,31 +252,26 @@ read_parquet_metadata(char *fname, const char *footkey)
 	return res;
 }
 
+class UniformKeyRetriever : public parquet::DecryptionKeyRetriever {
+	std::string key_;
+public:
+	UniformKeyRetriever(const std::string& key) : key_(key) {}
+	std::string GetKey(const std::string&) override { return key_; }
+};
+
 map<string, any>
-read_parquet(char *fname, const char *footkey, const char *col1key, const char *col2key)
+read_parquet(char *fname, const char *footkey, const char *colkey)
 {
 	map<string, any> lm;
 	std::unique_ptr<parquet::ParquetFileReader> parquet_reader;
 	parquet::ReaderProperties reader_properties = parquet::default_reader_properties();
 
-	std::map<std::string, std::shared_ptr<parquet::ColumnDecryptionProperties>> decryption_cols;
-
-	parquet::ColumnDecryptionProperties::Builder decryption_col_builder31(path_int64);
-	if (col1key) {
-		decryption_cols[path_int64] = decryption_col_builder31.key(col1key)->build();
-	}
-	parquet::ColumnDecryptionProperties::Builder decryption_col_builder32(path_str);
-	if (col2key) {
-		decryption_cols[path_str]   = decryption_col_builder32.key(col2key)->build();
-	}
-
 	parquet::FileDecryptionProperties::Builder file_decryption_builder_3;
 	if (footkey) {
-		std::vector<std::shared_ptr<parquet::FileDecryptionProperties>> vector_of_decryption_configurations;
-		vector_of_decryption_configurations.push_back(
-		    file_decryption_builder_3.footer_key(footkey)->column_keys(decryption_cols)->build());
-		// Add the current decryption configuration to ReaderProperties.
-		reader_properties.file_decryption_properties(vector_of_decryption_configurations[0]->DeepClone());
+		shared_ptr<parquet::FileDecryptionProperties> decryption_configuration = 
+			file_decryption_builder_3.footer_key(footkey)
+			->key_retriever(std::make_shared<UniformKeyRetriever>(colkey))->build();
+		reader_properties.file_decryption_properties(decryption_configuration->DeepClone());
 	}
 
 	try {
@@ -287,7 +281,7 @@ read_parquet(char *fname, const char *footkey, const char *col1key, const char *
 		int num_row_groups = file_metadata->num_row_groups();  //Get the number of RowGroups
 		int num_columns = file_metadata->num_columns();   //Get the number of Columns
 		assert(num_columns == 2);
-		//ptlog("%s:num_row_groups=[%d],num_columns=[%d]", fname, num_row_groups, num_columns);
+		ptlog("%s:num_row_groups=[%d],num_columns=[%d]", fname, num_row_groups, num_columns);
 
 		for (int r = 0; r < num_row_groups; ++r) {
 			std::shared_ptr<parquet::RowGroupReader> row_group_reader = parquet_reader->RowGroup(r);
@@ -489,9 +483,9 @@ compare_by_col1(pair<int64_t, string> a, pair<int64_t, string> b) {
 }
 
 map<string, any>
-pt_cat(char *col, char *fname, char *deli, char *footkey, char *col1key, char *col2key)
+pt_cat(char *col, char *fname, char *deli, char *footkey, char *colkey)
 {
-	map<string, any> lm = read_parquet(fname, footkey, col1key, col2key);
+	map<string, any> lm = read_parquet(fname, footkey, colkey);
 	return lm;
 }
 
@@ -505,20 +499,20 @@ ipt_metadata(char *fname, char *footkey)
 }
 
 void
-ipt_cat(char *col, char *fname, char *deli, char *footkey, char *col1key, char *col2key)
+ipt_cat(char *col, char *fname, char *deli, char *footkey, char *colkey)
 {
-	map<string, any> lm = pt_cat(col, fname, deli, footkey, col1key, col2key);
+	map<string, any> lm = pt_cat(col, fname, deli, footkey, colkey);
 	showparquet(lm, col, deli);
 }
 
 void
-ipt_replay(char *interval, char *url, char *topic, char *file, char *footkey, char *col1key, char *col2key)
+ipt_replay(char *interval, char *url, char *topic, char *file, char *footkey, char *colkey)
 {
 	nng_socket sock;
 	mqtt_connect(&sock, url);
 	int timepast = 0; // ms
 
-	map<string, any> lm = read_parquet(file, footkey, col1key, col2key);
+	map<string, any> lm = read_parquet(file, footkey, colkey);
 	if (lm.end() == lm.find(path_str)) {
 		pterr("No data found");
 		return;
@@ -537,7 +531,7 @@ ipt_replay(char *interval, char *url, char *topic, char *file, char *footkey, ch
 }
 
 map<string, any>
-pt_search(char *signal, char *start_key, char *end_key, char *dir, char *footkey, char *col1key, char *col2key)
+pt_search(char *signal, char *start_key, char *end_key, char *dir, char *footkey, char *colkey)
 {
 	vector<pair<int64_t, string>> res;
 	vector<string> fv = listdir((const char *)dir, "parquet");
@@ -549,7 +543,7 @@ pt_search(char *signal, char *start_key, char *end_key, char *dir, char *footkey
 			string p = string(dir);
 			if (p.back() != '/') p.push_back('/');
 			string fullpath = fname.insert(0, p);
-			map<string, any> lm = read_parquet((char *)fullpath.c_str(), footkey, col1key, col2key);
+			map<string, any> lm = read_parquet((char *)fullpath.c_str(), footkey, colkey);
 			vector<pair<int64_t, string>> rm = rangeof(lm, start_key, end_key);
 			res.insert(res.end(), rm.begin(), rm.end());
 		}
@@ -560,16 +554,16 @@ pt_search(char *signal, char *start_key, char *end_key, char *dir, char *footkey
 }
 
 void
-ipt_search(char *signal, char *start_key, char *end_key, char *dir, char *footkey, char *col1key, char *col2key)
+ipt_search(char *signal, char *start_key, char *end_key, char *dir, char *footkey, char *colkey)
 {
-	map<string, any> resm = pt_search(signal, start_key, end_key, dir, footkey, col1key, col2key);
+	map<string, any> resm = pt_search(signal, start_key, end_key, dir, footkey, colkey);
 	char foname[128];
 	sprintf(foname, "search-%s-%s-%s.parquet", signal, start_key, end_key);
-	write_parquet(foname, footkey, col1key, col2key, resm);
+	write_parquet(foname, footkey, colkey, resm);
 }
 
 map<string, any>
-pt_fuzz(char *signal, char *start_key, char *end_key, char *dir, char *footkey, char *col1key, char *col2key)
+pt_fuzz(char *signal, char *start_key, char *end_key, char *dir, char *footkey, char *colkey)
 {
 	int64_t lastts = 0;
 	vector<pair<int64_t, string>> res;
@@ -582,7 +576,7 @@ pt_fuzz(char *signal, char *start_key, char *end_key, char *dir, char *footkey, 
 			string p = string(dir);
 			if (p.back() != '/') p.push_back('/');
 			string fullpath = fname.insert(0, p);
-			map<string, any> lm = read_parquet((char *)fullpath.c_str(), footkey, col1key, col2key);
+			map<string, any> lm = read_parquet((char *)fullpath.c_str(), footkey, colkey);
 			vector<pair<int64_t, string>> rm = fuzz_ts_rangeof(lm, start_key, end_key, lastts);
 			res.insert(res.end(), rm.begin(), rm.end());
 		}
@@ -592,12 +586,12 @@ pt_fuzz(char *signal, char *start_key, char *end_key, char *dir, char *footkey, 
 }
 
 void
-ipt_fuzz(char *signal, char *start_key, char *end_key, char *dir, char *footkey, char *col1key, char *col2key)
+ipt_fuzz(char *signal, char *start_key, char *end_key, char *dir, char *footkey, char *colkey)
 {
-	map<string, any> resm = pt_fuzz(signal, start_key, end_key, dir, footkey, col1key, col2key);
+	map<string, any> resm = pt_fuzz(signal, start_key, end_key, dir, footkey, colkey);
 	char foname[128];
 	sprintf(foname, "fuzz-%s-%s-%s.parquet", signal, start_key, end_key);
-	write_parquet(foname, footkey, col1key, col2key, resm);
+	write_parquet(foname, footkey, colkey, resm);
 }
 
 void

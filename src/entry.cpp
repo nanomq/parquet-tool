@@ -140,8 +140,7 @@ help_cat()
 	printf(": -f file\n");
 	printf(": -m delimiter (\\n by default)\n");
 	printf(": -x footer key\n");
-	printf(": -y column1 key\n");
-	printf(": -z column2 key\n");
+	printf(": -y column key\n");
 	exit(0);
 }
 
@@ -153,9 +152,8 @@ entry_cat(int argc, char **argv)
 	char *file = NULL;
 	char *deli = NULL;
 	char *fk   = NULL;
-	char *c1k  = NULL;
-	char *c2k  = NULL;
-	while ((c = getopt(argc, argv, ":c:f:m:x:y:z:")) != -1) {
+	char *ck   = NULL;
+	while ((c = getopt(argc, argv, ":c:f:m:x:y:")) != -1) {
 		switch (c) {
 		case 'c':
 			col = optarg;
@@ -170,10 +168,7 @@ entry_cat(int argc, char **argv)
 			fk = optarg;
 			break;
 		case 'y':
-			c1k = optarg;
-			break;
-		case 'z':
-			c2k = optarg;
+			ck = optarg;
 			break;
 		}
 	}
@@ -185,7 +180,7 @@ entry_cat(int argc, char **argv)
 		pterr("null argument file");
 		help_cat();
 	}
-	ipt_cat(col, file, deli, fk, c1k, c2k);
+	ipt_cat(col, file, deli, fk, ck);
 }
 
 void
@@ -198,8 +193,7 @@ help_search()
 	printf(": -r range\n");
 	printf(": -d directory\n");
 	printf(": -x footer key\n");
-	printf(": -y column1 key\n");
-	printf(": -z column2 key\n");
+	printf(": -y column key\n");
 	exit(0);
 }
 
@@ -211,10 +205,9 @@ entry_search(int argc, char **argv)
 	char *range = NULL;
 	char *dir   = NULL;
 	char *fk    = NULL;
-	char *c1k   = NULL;
-	char *c2k   = NULL;
+	char *ck    = NULL;
 	char *start_key, *end_key;
-	while ((c = getopt(argc, argv, ":s:r:d:x:y:z:")) != -1) {
+	while ((c = getopt(argc, argv, ":s:r:d:x:y:")) != -1) {
 		switch (c) {
 		case 's':
 			sig = optarg;
@@ -229,10 +222,7 @@ entry_search(int argc, char **argv)
 			fk = optarg;
 			break;
 		case 'y':
-			c1k = optarg;
-			break;
-		case 'z':
-			c2k = optarg;
+			ck = optarg;
 			break;
 		}
 	}
@@ -256,7 +246,7 @@ entry_search(int argc, char **argv)
 	}
 	end_key[0] = '\0';
 	end_key ++;
-	ipt_search(sig, start_key, end_key, dir, fk, c1k, c2k);
+	ipt_search(sig, start_key, end_key, dir, fk, ck);
 }
 
 void
@@ -269,8 +259,7 @@ help_fuzz()
 	printf(": -r range\n");
 	printf(": -d directory\n");
 	printf(": -x footer key\n");
-	printf(": -y column1 key\n");
-	printf(": -z column2 key\n");
+	printf(": -y column key\n");
 	exit(0);
 }
 
@@ -282,10 +271,9 @@ entry_fuzz(int argc, char **argv)
 	char *range = NULL;
 	char *dir   = NULL;
 	char *fk    = NULL;
-	char *c1k   = NULL;
-	char *c2k   = NULL;
+	char *ck    = NULL;
 	char *start_key, *end_key;
-	while ((c = getopt(argc, argv, ":s:r:d:x:y:z:")) != -1) {
+	while ((c = getopt(argc, argv, ":s:r:d:x:y:")) != -1) {
 		switch (c) {
 		case 's':
 			sig = optarg;
@@ -300,10 +288,7 @@ entry_fuzz(int argc, char **argv)
 			fk = optarg;
 			break;
 		case 'y':
-			c1k = optarg;
-			break;
-		case 'z':
-			c2k = optarg;
+			ck = optarg;
 			break;
 		}
 	}
@@ -327,7 +312,7 @@ entry_fuzz(int argc, char **argv)
 	}
 	end_key[0] = '\0';
 	end_key ++;
-	ipt_fuzz(sig, start_key, end_key, dir, fk, c1k, c2k);
+	ipt_fuzz(sig, start_key, end_key, dir, fk, ck);
 }
 
 void
@@ -341,8 +326,7 @@ help_replay()
 	printf(": -t topic\n");
 	printf(": -f file\n");
 	printf(": -x footer key\n");
-	printf(": -y column1 key\n");
-	printf(": -z column2 key\n");
+	printf(": -y column key\n");
 	exit(0);
 }
 
@@ -355,10 +339,9 @@ entry_replay(int argc, char **argv)
 	char *topic = NULL;
 	char *file  = NULL;
 	char *fk    = NULL;
-	char *c1k   = NULL;
-	char *c2k   = NULL;
+	char *ck    = NULL;
 	char *start_key, *end_key;
-	while ((c = getopt(argc, argv, ":i:u:t:f:x:y:z:")) != -1) {
+	while ((c = getopt(argc, argv, ":i:u:t:f:x:y:")) != -1) {
 		switch (c) {
 		case 'i':
 			itv = optarg;
@@ -376,10 +359,7 @@ entry_replay(int argc, char **argv)
 			fk = optarg;
 			break;
 		case 'y':
-			c1k = optarg;
-			break;
-		case 'z':
-			c2k = optarg;
+			ck = optarg;
 			break;
 		}
 	}
@@ -399,7 +379,7 @@ entry_replay(int argc, char **argv)
 		pterr("null argument file");
 		help_replay();
 	}
-	ipt_replay(itv, url, topic, file, fk, c1k, c2k);
+	ipt_replay(itv, url, topic, file, fk, ck);
 }
 
 void
