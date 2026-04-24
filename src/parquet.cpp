@@ -66,7 +66,26 @@ try {
 	    ->disable_dictionary(schema[0])
 	    ->compression(static_cast<arrow::Compression::type>(4)); // ZSTD
 
-	// TODO Encrypt
+	// Encrypt
+	if (footkey && colkey) {
+		shared_ptr<parquet::FileEncryptionProperties> enc_prop;
+		std::map<std::string, std::shared_ptr<parquet::ColumnEncryptionProperties>> col_enc_map;
+		for (int i=0; i<2; ++i) {
+			const char *col_name = schema[i];
+			parquet::ColumnEncryptionProperties::Builder col_builder(col_name);
+			col_builder.key(colkey)->key_metadata("col_key_metadata");
+			col_enc_map[col_name] = col_builder.build();
+		}
+		parquet::FileEncryptionProperties::Builder file_encryption_builder(footkey);
+		enc_prop = file_encryption_builder
+			.footer_key_metadata("fk")
+			->encrypted_columns(col_enc_map)
+			->algorithm(static_cast<parquet::ParquetCipher::type>(0)) // AES_GCM_V1
+			->set_plaintext_footer()
+			->build();
+
+		builder.encryption(enc_prop);
+	}
 
 	shared_ptr<parquet::WriterProperties> props = builder.build();
 	using FileClass = arrow::io::FileOutputStream;
@@ -74,6 +93,20 @@ try {
 	PARQUET_ASSIGN_OR_THROW(out_file, FileClass::Open(fname));
 	shared_ptr<parquet::ParquetFileWriter> file_writer =
 	    parquet::ParquetFileWriter::Open(out_file, _schema, props);
+
+	shared_ptr<arrow::KeyValueMetadata> kv = make_shared<arrow::KeyValueMetadata>();
+	kv->Append("nmq.meta.version", "1");
+	kv->Append("nmq.topic", "tool_test_topic");
+	if (footkey && colkey) {
+		kv->Append("nmq.enc.cipher", "AES_GCM_V1");
+		kv->Append("nmq.key.id", "fk");
+		kv->Append("nmq.key.wrap_alg", "NMQ_CONF_CIPHER_AES_GCM_BASE64");
+		kv->Append("nmq.key.wrapped", "aaaaaaaaaa");
+	}
+	kv->Append("nmq.created_by", "NanoMQ");
+	kv->Append("nmq.created_at", std::to_string((long long) time(NULL)));
+	kv->Append("number", "1");
+	file_writer->AddKeyValueMetadata(kv);
 
 	ptlog("parquet writter init done");
 
@@ -281,7 +314,7 @@ read_parquet(char *fname, const char *footkey, const char *colkey)
 		int num_row_groups = file_metadata->num_row_groups();  //Get the number of RowGroups
 		int num_columns = file_metadata->num_columns();   //Get the number of Columns
 		assert(num_columns == 2);
-		ptlog("%s:num_row_groups=[%d],num_columns=[%d]", fname, num_row_groups, num_columns);
+		// ptlog("%s:num_row_groups=[%d],num_columns=[%d]", fname, num_row_groups, num_columns);
 
 		for (int r = 0; r < num_row_groups; ++r) {
 			std::shared_ptr<parquet::RowGroupReader> row_group_reader = parquet_reader->RowGroup(r);

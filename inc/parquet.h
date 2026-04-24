@@ -24,6 +24,7 @@ void ipt_schema(char *fname, char *schemafile, char *deli);
 // Expose for testing
 map<string, any> read_parquet(char *fname, const char *footkey, const char *colkey);
 map<string, any> read_parquet_schema(char *fname, const char **schema, uint16_t schema_len);
+map<string, string> read_parquet_metadata(char *fname, const char *footkey);
 int write_parquet(char *fname, const char *footkey, const char *colkey, map<string, any> lm);
 
 #endif
