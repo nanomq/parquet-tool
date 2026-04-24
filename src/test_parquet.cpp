@@ -26,6 +26,43 @@ test_rw_parquet()
 
 	assert(0 == write_parquet(output, footkey, colkey, m1));
 
+	// Show metadata
+	map<string, string> metadatas = read_parquet_metadata(output, footkey);
+	for (auto& x: metadatas) {
+		printf("%s: %s\n", x.first.c_str(), x.second.c_str());
+	}
+
+	map<string, any> m2 = read_parquet(output, footkey, colkey);
+	list<int64_t> lk2 = any_cast<list<int64_t>>(m2["key"]);
+	list<string>  lp2 = any_cast<list<string>>(m2["data"]);
+	for (auto it = lk.begin(), it2 = lk2.begin(); it != lk.end(); it ++, it2 ++)
+		assert(*it == *it2);
+	for (auto it = lp.begin(), it2 = lp2.begin(); it != lp.end(); it ++, it2 ++)
+		assert(0 == it->compare(it2->c_str()));
+}
+
+void
+test_rw_enc_parquet()
+{
+	char *output = (char *)"./test_enc.parquet";
+	const char *footkey = "0123456789012345";
+	const char *colkey  = "0123456789012345";
+	map<string, any> m1;
+	list<int64_t> lk;
+	list<string> lp;
+	lk.push_back(6); lp.push_back("aaa");
+	lk.push_back(7); lp.push_back("bbb");
+	lk.push_back(8); lp.push_back("ccc");
+	m1["key"] = lk; m1["data"] = lp;
+
+	assert(0 == write_parquet(output, footkey, colkey, m1));
+
+	// Show metadata
+	map<string, string> metadatas = read_parquet_metadata(output, footkey);
+	for (auto& x: metadatas) {
+		printf("%s: %s\n", x.first.c_str(), x.second.c_str());
+	}
+
 	map<string, any> m2 = read_parquet(output, footkey, colkey);
 	list<int64_t> lk2 = any_cast<list<int64_t>>(m2["key"]);
 	list<string>  lp2 = any_cast<list<string>>(m2["data"]);
@@ -96,6 +133,7 @@ int
 main()
 {
 	test_rw_parquet();
+	test_rw_enc_parquet();
 	test_search();
 	test_fuzz();
 }
